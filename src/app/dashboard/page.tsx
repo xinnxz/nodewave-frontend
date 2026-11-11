@@ -3,6 +3,7 @@
 import { CreateProjectModal } from '@/components/create-project-modal';
 import { DeliverablesBarChart } from '@/components/deliverables-bar-chart';
 import { Sidebar } from '@/components/sidebar';
+import { StandupSummaryModal } from '@/components/standup-summary-modal';
 import { HighlightCard } from '@/components/ui/card-5';
 import { DonutChart } from '@/components/ui/donut-chart';
 import { StackedList } from '@/components/ui/stacked-list';
@@ -10,16 +11,7 @@ import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import type { ApiListResponse, Project, User } from '@/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Calendar,
-  CheckCircle2,
-  ChevronDown,
-  Layers,
-  Plus,
-  RefreshCw,
-  Search,
-  Sparkles,
-} from 'lucide-react';
+import { Calendar, CheckCircle2, Layers, Plus, RefreshCw, Search, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -32,6 +24,7 @@ export default function DashboardPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
+  const [isStandupOpen, setIsStandupOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Authentication check
@@ -131,7 +124,11 @@ export default function DashboardPage() {
       {/* ─────────────────────────────────────────────────────────────
           1. UNIFIED MODERN CANVASO SIDEBAR
          ───────────────────────────────────────────────────────────── */}
-      <Sidebar current="dashboard" projectId={projects[0]?.id} />
+      <Sidebar
+        current="dashboard"
+        projectId={projects[0]?.id}
+        onOpenStandupAI={() => setIsStandupOpen(true)}
+      />
 
       {/* ─────────────────────────────────────────────────────────────
           2. MAIN CONTENT AREA (Clean Modern Canvas)
@@ -322,6 +319,15 @@ export default function DashboardPage() {
 
       {/* Modal Buat Proyek Baru */}
       <CreateProjectModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
+
+      {/* Daily Standup AI Modal (dari sidebar AI Assisten) */}
+      {projects[0]?.id && (
+        <StandupSummaryModal
+          projectId={projects[0].id}
+          isOpen={isStandupOpen}
+          onClose={() => setIsStandupOpen(false)}
+        />
+      )}
     </div>
   );
 }

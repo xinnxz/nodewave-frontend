@@ -16,7 +16,7 @@ export const DEMO_PERSONAS = [
     roleLabel: 'Product Manager',
     email: 'pm@nodewave.id',
     dept: 'PRODUCT',
-    avatar: '/assets/avatars/avatar-ns.svg',
+    avatar: '/avatar-3d.png',
   },
   {
     name: 'Siti Rahma',
@@ -25,7 +25,7 @@ export const DEMO_PERSONAS = [
     roleLabel: 'UI/UX Designer',
     email: 'uiux@nodewave.id',
     dept: 'UIUX',
-    avatar: '/assets/avatars/avatar-sr.svg',
+    avatar: '/avatar-3d.png',
   },
   {
     name: 'Budi Santoso',
@@ -34,7 +34,7 @@ export const DEMO_PERSONAS = [
     roleLabel: 'Frontend Engineer',
     email: 'frontend@nodewave.id',
     dept: 'FRONTEND',
-    avatar: '/assets/avatars/avatar-bs.svg',
+    avatar: '/avatar-3d.png',
   },
   {
     name: 'Eko Wijaya',
@@ -43,7 +43,7 @@ export const DEMO_PERSONAS = [
     roleLabel: 'Backend Architect',
     email: 'backend@nodewave.id',
     dept: 'BACKEND',
-    avatar: '/assets/avatars/avatar-ew.svg',
+    avatar: '/avatar-3d.png',
   },
   {
     name: 'PT Maju Jaya',
@@ -52,19 +52,13 @@ export const DEMO_PERSONAS = [
     roleLabel: 'Client Guest (Tenant)',
     email: 'client@guest.com',
     dept: 'CLIENT',
-    avatar: '/assets/avatars/avatar-nw.svg',
+    avatar: '/avatar-3d.png',
   },
 ];
 
-export function getPersonaAvatar(email?: string, name?: string): string {
-  if (!email && !name) return '/assets/avatars/avatar-ns.svg';
-  const val = `${email || ''} ${name || ''}`.toLowerCase();
-  if (val.includes('budi') || val.includes('frontend')) return '/assets/avatars/avatar-bs.svg';
-  if (val.includes('eko') || val.includes('backend')) return '/assets/avatars/avatar-ew.svg';
-  if (val.includes('siti') || val.includes('uiux')) return '/assets/avatars/avatar-sr.svg';
-  if (val.includes('andi') || val.includes('niko') || val.includes('pm'))
-    return '/assets/avatars/avatar-ns.svg';
-  return '/assets/avatars/avatar-nw.svg';
+export function getPersonaAvatar(_email?: string, _name?: string): string {
+  // Semua persona menggunakan avatar-3d.png yang konsisten dengan halaman login
+  return '/avatar-3d.png';
 }
 
 interface SidebarProps {
@@ -378,7 +372,7 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
                 <img
                   src={activeAvatar}
                   alt={user?.name || 'User'}
-                  className="h-8 w-8 rounded-full object-cover shrink-0 ring-1 ring-slate-200 shadow-2xs"
+                  className="h-8 w-8 rounded-full object-contain shrink-0 ring-1 ring-slate-200 shadow-2xs filter drop-shadow"
                 />
                 <div className="min-w-0">
                   <p className="truncate text-xs font-bold text-slate-900 leading-tight">
@@ -423,7 +417,7 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
                     <img
                       src={p.avatar}
                       alt={p.name}
-                      className="h-5 w-5 rounded-full object-cover shrink-0"
+                      className="h-6 w-6 rounded-full object-contain shrink-0 filter drop-shadow"
                     />
                     <div className="min-w-0 flex-1">
                       <p className="text-[11px] leading-tight truncate">{p.name}</p>
