@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
+import { DepartmentBadge, RoleBadge, StatusBadge } from '../components/status-badge';
 import { evaluateStatusTransition } from '../lib/utils';
-import { StatusBadge, DepartmentBadge, RoleBadge } from '../components/status-badge';
 import type { Task, User } from '../types';
 
 /**
