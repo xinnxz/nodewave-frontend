@@ -83,19 +83,19 @@ export default function LoginPage() {
         u_time: { value: 0 },
         u_mouse: { value: new THREE.Vector2(-5000, -5000) },
         u_resolution: { value: new THREE.Vector2(window.innerWidth * 2, window.innerHeight * 2) },
-        u_opacities: { value: [0.08, 0.12, 0.16, 0.22, 0.28, 0.34, 0.4, 0.46, 0.52, 0.58] },
+        u_opacities: { value: [0.18, 0.24, 0.3, 0.38, 0.46, 0.54, 0.62, 0.7, 0.76, 0.82] },
         u_colors: {
           value: [
-            new THREE.Vector3(0.72, 0.75, 0.8),
-            new THREE.Vector3(0.72, 0.75, 0.8),
-            new THREE.Vector3(0.72, 0.75, 0.8),
-            new THREE.Vector3(0.72, 0.75, 0.8),
-            new THREE.Vector3(0.72, 0.75, 0.8),
-            new THREE.Vector3(0.72, 0.75, 0.8),
+            new THREE.Vector3(0.78, 0.82, 0.88),
+            new THREE.Vector3(0.78, 0.82, 0.88),
+            new THREE.Vector3(0.78, 0.82, 0.88),
+            new THREE.Vector3(0.78, 0.82, 0.88),
+            new THREE.Vector3(0.78, 0.82, 0.88),
+            new THREE.Vector3(0.78, 0.82, 0.88),
           ],
         },
         u_total_size: { value: 20.0 },
-        u_dot_size: { value: 4.5 },
+        u_dot_size: { value: 5.2 },
         u_reverse: { value: 0 },
       };
 
@@ -144,15 +144,30 @@ export default function LoginPage() {
               float rand = random(st2 * floor((u_time / frequency) + show_offset + frequency));
               opacity *= u_opacities[int(rand * 10.0)];
 
-              // ─── Ultra-Smooth Gentle Mouse Proximity Effect ───
+              // ─── NodeWave Ripple & Wave Interaction ───
               float mouse_dist = distance(fragCoord.xy, u_mouse);
-              float mouse_radius = 520.0; // Wide ~260px radius for seamless soft falloff
-              float norm_dist = clamp(mouse_dist / mouse_radius, 0.0, 1.0);
-              // Quadratic smooth ease-out falloff eliminates any harsh circular borders
-              float mouse_influence = (1.0 - norm_dist) * (1.0 - norm_dist);
+              float mouse_radius = 850.0; // Wide radius (~425px on screen)
+              float d = clamp(mouse_dist / mouse_radius, 0.0, 1.0);
 
-              // Subtle dot expansion (barely +0.8px) so dots stay refined and never chunk up
-              float dynamic_dot_size = u_dot_size + (mouse_influence * 0.8);
+              // Concentric sinusoidal wave propagating outward from cursor
+              float wave_phase = (mouse_dist * 0.024) - (u_time * 3.5);
+              float raw_wave = sin(wave_phase);
+              // Sharpen wave peaks for defined, crisp ripple rings (ombak)
+              float wave_crest = pow(max(raw_wave, 0.0), 1.6);
+
+              // Wave envelope: prominent ripple along the middle-to-outer ring (pinggirannya)
+              float ring_envelope = sin(d * 3.14159265);
+              float boundary_fade = 1.0 - smoothstep(0.82, 1.0, d);
+              float wave_amplitude = wave_crest * ring_envelope * boundary_fade;
+
+              // Soft central luminous glow right under cursor
+              float center_glow = (1.0 - smoothstep(0.0, 0.45, d)) * 0.35;
+
+              // Combined total wave intensity
+              float wave_effect = clamp(wave_amplitude * 0.85 + center_glow, 0.0, 1.0);
+
+              // Dynamic dot size: swell physically at wave crests from 5.2px up to 7.2px
+              float dynamic_dot_size = u_dot_size + (wave_effect * 2.0);
 
               opacity *= 1.0 - step(dynamic_dot_size / u_total_size, fract(st.x / u_total_size));
               opacity *= 1.0 - step(dynamic_dot_size / u_total_size, fract(st.y / u_total_size));
@@ -169,13 +184,13 @@ export default function LoginPage() {
               opacity *= step(current_timing_offset, u_time * animation_speed_factor);
               opacity *= clamp((1.0 - step(current_timing_offset + 0.1, u_time * animation_speed_factor)) * 1.25, 1.0, 1.25);
 
-              // Gentle ambient brightness lift (+0.20 max) capped softly at 0.65
-              opacity += mouse_influence * 0.20 * step(0.001, opacity);
-              opacity = clamp(opacity, 0.0, 0.65);
+              // Boost opacity at wave crests for clear visible presence
+              opacity += wave_effect * 0.48 * step(0.001, opacity);
+              opacity = clamp(opacity, 0.0, 0.85);
 
-              // Soft elegant transition to muted platinum silver (not blinding white)
-              vec3 soft_white = vec3(0.82, 0.85, 0.90);
-              color = mix(color, soft_white, mouse_influence * 0.45);
+              // Wave crests illuminate with luminous crisp silver-white
+              vec3 wave_glow_color = vec3(0.92, 0.96, 1.0);
+              color = mix(color, wave_glow_color, wave_effect * 0.75);
 
               fragColor = vec4(color, opacity);
           }
@@ -201,9 +216,9 @@ export default function LoginPage() {
         animationId = requestAnimationFrame(animate);
         uniforms.u_time.value = (performance.now() - startTime) / 1000.0;
 
-        // Silky smooth fluid lerp interpolation (0.08) for velvety organic mouse tracking
-        currentMouse.x += (targetMouse.x - currentMouse.x) * 0.08;
-        currentMouse.y += (targetMouse.y - currentMouse.y) * 0.08;
+        // Silky smooth fluid lerp interpolation (0.10) for velvety organic wave tracking
+        currentMouse.x += (targetMouse.x - currentMouse.x) * 0.1;
+        currentMouse.y += (targetMouse.y - currentMouse.y) * 0.1;
         uniforms.u_mouse.value.copy(currentMouse);
 
         renderer.render(scene, camera);
