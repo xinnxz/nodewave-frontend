@@ -16,7 +16,6 @@ const SEEDED_PERSONAS = [
     role: 'Product Manager',
     dept: 'PRODUCT',
     email: 'pm@nodewave.id',
-    avatarBg: 'bg-indigo-600/20 border-indigo-500/30',
   },
   {
     initials: 'SR',
@@ -24,7 +23,6 @@ const SEEDED_PERSONAS = [
     role: 'UI/UX Designer',
     dept: 'UIUX',
     email: 'uiux@nodewave.id',
-    avatarBg: 'bg-purple-600/20 border-purple-500/30',
   },
   {
     initials: 'BS',
@@ -32,7 +30,6 @@ const SEEDED_PERSONAS = [
     role: 'Frontend Engineer',
     dept: 'FRONTEND',
     email: 'frontend@nodewave.id',
-    avatarBg: 'bg-emerald-600/20 border-emerald-500/30',
   },
   {
     initials: 'EW',
@@ -40,7 +37,6 @@ const SEEDED_PERSONAS = [
     role: 'Backend Engineer',
     dept: 'BACKEND',
     email: 'backend@nodewave.id',
-    avatarBg: 'bg-amber-600/20 border-amber-500/30',
   },
   {
     initials: 'MJ',
@@ -48,7 +44,6 @@ const SEEDED_PERSONAS = [
     role: 'Client Guest',
     dept: 'CLIENT',
     email: 'client@guest.com',
-    avatarBg: 'bg-yellow-600/20 border-yellow-500/30',
     fullWidth: true,
   },
 ];
@@ -87,7 +82,7 @@ export default function LoginPage() {
       const uniforms = {
         u_time: { value: 0 },
         u_resolution: { value: new THREE.Vector2(window.innerWidth * 2, window.innerHeight * 2) },
-        u_opacities: { value: [0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1.0] },
+        u_opacities: { value: [0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.9, 0.95, 1.0, 1.0] },
         u_colors: {
           value: [
             new THREE.Vector3(1, 1, 1),
@@ -162,7 +157,6 @@ export default function LoginPage() {
               opacity *= clamp((1.0 - step(current_timing_offset + 0.1, u_time * animation_speed_factor)) * 1.25, 1.0, 1.25);
 
               fragColor = vec4(color, opacity);
-              fragColor.rgb *= fragColor.a;
           }
         `,
         uniforms: uniforms,
@@ -257,8 +251,8 @@ export default function LoginPage() {
       {/* WebGL Dot Matrix Canvas Background */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
 
-      {/* Original 21st.dev Template Vignette Gradient */}
-      <div className="absolute inset-0 z-1 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.98)_100%)]" />
+      {/* Subtle Cinematic Vignette Mask - Lets bright white matrix dots shine through */}
+      <div className="absolute inset-0 z-1 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.35)_60%,rgba(0,0,0,0.85)_100%)]" />
 
       {/* Top Brand Header with Larger Official NodeWave Logo */}
       <div className="relative z-10 mb-2 sm:mb-2.5 text-center">
@@ -402,15 +396,13 @@ export default function LoginPage() {
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <div
-                    className={`relative flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg border overflow-hidden p-0.5 ${persona.avatarBg}`}
-                  >
+                  <div className="relative flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center">
                     <Image
                       src="/avatar-3d.png"
                       alt={persona.name}
                       width={32}
                       height={32}
-                      className="h-full w-full object-contain filter drop-shadow-sm group-hover:scale-110 transition-transform duration-200"
+                      className="h-full w-full object-contain filter drop-shadow group-hover:scale-110 transition-transform duration-200"
                     />
                   </div>
                   <div className="min-w-0">
