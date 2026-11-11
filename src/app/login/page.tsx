@@ -83,19 +83,19 @@ export default function LoginPage() {
         u_time: { value: 0 },
         u_mouse: { value: new THREE.Vector2(-5000, -5000) },
         u_resolution: { value: new THREE.Vector2(window.innerWidth * 2, window.innerHeight * 2) },
-        u_opacities: { value: [0.12, 0.18, 0.24, 0.3, 0.36, 0.44, 0.52, 0.6, 0.68, 0.75] },
+        u_opacities: { value: [0.08, 0.12, 0.16, 0.22, 0.28, 0.34, 0.4, 0.46, 0.52, 0.58] },
         u_colors: {
           value: [
-            new THREE.Vector3(0.75, 0.78, 0.82),
-            new THREE.Vector3(0.75, 0.78, 0.82),
-            new THREE.Vector3(0.75, 0.78, 0.82),
-            new THREE.Vector3(0.75, 0.78, 0.82),
-            new THREE.Vector3(0.75, 0.78, 0.82),
-            new THREE.Vector3(0.75, 0.78, 0.82),
+            new THREE.Vector3(0.72, 0.75, 0.8),
+            new THREE.Vector3(0.72, 0.75, 0.8),
+            new THREE.Vector3(0.72, 0.75, 0.8),
+            new THREE.Vector3(0.72, 0.75, 0.8),
+            new THREE.Vector3(0.72, 0.75, 0.8),
+            new THREE.Vector3(0.72, 0.75, 0.8),
           ],
         },
         u_total_size: { value: 20.0 },
-        u_dot_size: { value: 5.0 },
+        u_dot_size: { value: 4.5 },
         u_reverse: { value: 0 },
       };
 
@@ -144,13 +144,15 @@ export default function LoginPage() {
               float rand = random(st2 * floor((u_time / frequency) + show_offset + frequency));
               opacity *= u_opacities[int(rand * 10.0)];
 
-              // ─── Interactive Mouse Proximity Effect ───
+              // ─── Ultra-Smooth Gentle Mouse Proximity Effect ───
               float mouse_dist = distance(fragCoord.xy, u_mouse);
-              float mouse_radius = 360.0; // ~180px screen radius
-              float mouse_influence = smoothstep(mouse_radius, 0.0, mouse_dist);
+              float mouse_radius = 520.0; // Wide ~260px radius for seamless soft falloff
+              float norm_dist = clamp(mouse_dist / mouse_radius, 0.0, 1.0);
+              // Quadratic smooth ease-out falloff eliminates any harsh circular borders
+              float mouse_influence = (1.0 - norm_dist) * (1.0 - norm_dist);
 
-              // Expand dot radius slightly near cursor for fluid gravitational lens effect
-              float dynamic_dot_size = u_dot_size + (mouse_influence * 2.5);
+              // Subtle dot expansion (barely +0.8px) so dots stay refined and never chunk up
+              float dynamic_dot_size = u_dot_size + (mouse_influence * 0.8);
 
               opacity *= 1.0 - step(dynamic_dot_size / u_total_size, fract(st.x / u_total_size));
               opacity *= 1.0 - step(dynamic_dot_size / u_total_size, fract(st.y / u_total_size));
@@ -167,12 +169,13 @@ export default function LoginPage() {
               opacity *= step(current_timing_offset, u_time * animation_speed_factor);
               opacity *= clamp((1.0 - step(current_timing_offset + 0.1, u_time * animation_speed_factor)) * 1.25, 1.0, 1.25);
 
-              // Elevate brightness and transition to luminous crystal white near cursor
-              opacity += mouse_influence * 0.55 * step(0.001, opacity);
-              opacity = clamp(opacity, 0.0, 1.0);
+              // Gentle ambient brightness lift (+0.20 max) capped softly at 0.65
+              opacity += mouse_influence * 0.20 * step(0.001, opacity);
+              opacity = clamp(opacity, 0.0, 0.65);
 
-              vec3 radiant_white = vec3(0.98, 1.0, 1.0);
-              color = mix(color, radiant_white, mouse_influence * 0.85);
+              // Soft elegant transition to muted platinum silver (not blinding white)
+              vec3 soft_white = vec3(0.82, 0.85, 0.90);
+              color = mix(color, soft_white, mouse_influence * 0.45);
 
               fragColor = vec4(color, opacity);
           }
@@ -198,9 +201,9 @@ export default function LoginPage() {
         animationId = requestAnimationFrame(animate);
         uniforms.u_time.value = (performance.now() - startTime) / 1000.0;
 
-        // Smooth fluid lerp interpolation for 60fps organic mouse tracking
-        currentMouse.x += (targetMouse.x - currentMouse.x) * 0.15;
-        currentMouse.y += (targetMouse.y - currentMouse.y) * 0.15;
+        // Silky smooth fluid lerp interpolation (0.08) for velvety organic mouse tracking
+        currentMouse.x += (targetMouse.x - currentMouse.x) * 0.08;
+        currentMouse.y += (targetMouse.y - currentMouse.y) * 0.08;
         uniforms.u_mouse.value.copy(currentMouse);
 
         renderer.render(scene, camera);
