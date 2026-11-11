@@ -40,3 +40,19 @@
   pointer-events: none;
   z-index: 10;
 }
+
+/* Sleek custom scrollbars matching ClickUp & Linear */
+.kanban-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.kanban-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.kanban-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(203, 213, 225, 0.6);
+  border-radius: 9999px;
+}
+.kanban-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.9);
+}

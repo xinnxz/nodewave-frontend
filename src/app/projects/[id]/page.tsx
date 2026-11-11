@@ -9,17 +9,7 @@ import { evaluateStatusTransition } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import type { ApiListResponse, ApiSingleResponse, Project, Task, TaskStatus } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  AlertTriangle,
-  Calendar,
-  CheckCircle2,
-  GitBranch,
-  Lock,
-  Plus,
-  RefreshCw,
-  Search,
-  Sparkles,
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Plus, RefreshCw, Search, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -165,7 +155,7 @@ export default function ProjectDetailPage({
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/20">
       {/* ─────────────────────────────────────────────────────────────
-          1. UNIFIED MODERN CANVASO SIDEBAR
+          1. UNIFIED MODERN SIDEBAR
          ───────────────────────────────────────────────────────────── */}
       <Sidebar
         current="kanban"
@@ -174,11 +164,11 @@ export default function ProjectDetailPage({
       />
 
       {/* ─────────────────────────────────────────────────────────────
-          2. MAIN CONTENT AREA (Scrollable Modern Kanban Board)
+          2. MAIN CONTENT AREA (Single Viewport, Zero Double Scrollbar)
          ───────────────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {/* Top Breadcrumb Header Bar matching Reference Canvaso UI */}
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-6 py-3 shadow-2xs">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        {/* Top Header Bar */}
+        <header className="shrink-0 flex items-center justify-between border-b border-slate-200/80 bg-white px-6 py-2.5 shadow-2xs z-20">
           <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
             <img
               src="/assets/navigation/project-task.svg"
@@ -189,15 +179,15 @@ export default function ProjectDetailPage({
               Projects
             </Link>
             <span className="text-slate-300">›</span>
-            <span className="text-slate-400">{project?.clientName || 'Design Update'}</span>
+            <span className="text-slate-400">{project?.clientName || 'Client'}</span>
             <span className="text-slate-300">›</span>
             <span className="font-bold text-slate-900 truncate max-w-[200px] sm:max-w-xs">
-              {project?.name || 'Product Web'}
+              {project?.name || 'Deliverables'}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Team Avatar Stack matching Reference */}
+            {/* Team Avatar Stack */}
             <div className="hidden sm:flex items-center -space-x-2">
               <span className="inline-flex items-center justify-center h-6 w-6 rounded-full ring-2 ring-white bg-blue-50 text-blue-600 text-[10px] font-bold shadow-2xs z-40">
                 8+
@@ -219,7 +209,7 @@ export default function ProjectDetailPage({
               />
             </div>
 
-            {/* Daily Standup Auto-Summary Button */}
+            {/* Daily Standup AI Button */}
             {user.role === 'PM' && (
               <button
                 type="button"
@@ -236,7 +226,7 @@ export default function ProjectDetailPage({
               <button
                 type="button"
                 onClick={() => setIsCreateTaskOpen(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-3.5 py-1.5 text-xs font-bold text-white transition-transform active:scale-[0.98] shadow-xs"
+                className="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-1.5 text-xs font-bold text-white transition-transform active:scale-[0.98] shadow-xs"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Add Task</span>
@@ -245,88 +235,75 @@ export default function ProjectDetailPage({
           </div>
         </header>
 
-        {/* Content Body */}
-        <main className="flex-1 p-6 space-y-5">
-          {/* Title & Board Tabs Row matching Reference UI */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+        {/* Content Body (Flex Column Filling Remainder) */}
+        <main className="flex-1 flex flex-col p-5 min-h-0 overflow-hidden space-y-3.5">
+          {/* Sub-Header: Title, Tabs & Filters */}
+          <div className="shrink-0 flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-2 border-b border-slate-200/80">
             <div>
-              <div className="flex items-center gap-3">
-                <div className="relative w-8 h-8 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="relative w-7 h-7 shrink-0">
                   <Image
                     src="/project-3d-icon.png"
                     alt="Project Icon"
-                    width={32}
-                    height={32}
+                    width={28}
+                    height={28}
                     className="w-full h-full object-contain filter drop-shadow-xs"
                   />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                    {project?.name || 'Product Design'}
+                  <h1 className="text-lg font-bold tracking-tight text-slate-900 leading-tight">
+                    {project?.name || 'Deliverables Board'}
                   </h1>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Track your project and goal with full AI Assistants & DAG Governance
+                  <p className="text-[11px] text-slate-500">
+                    Track deliverables with DAG Governance & Multi-Tenant ABAC
                   </p>
                 </div>
               </div>
 
-              {/* View Tabs matching Reference */}
-              <div className="mt-4 flex items-center gap-2">
+              {/* View Tabs */}
+              <div className="mt-2.5 flex items-center gap-1.5">
                 <Link
                   href="/dashboard"
-                  className="rounded-lg px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                  className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
                 >
                   Overview
                 </Link>
                 <button
                   type="button"
-                  className="rounded-lg bg-slate-900 px-3 py-1 text-xs font-bold text-white shadow-xs"
+                  className="rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-bold text-white shadow-xs"
                 >
                   Kanban
                 </button>
-                <span className="rounded-lg px-3 py-1 text-xs font-medium text-slate-400 cursor-not-allowed">
+                <span className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-400 cursor-not-allowed">
                   Activities
                 </span>
-                <span className="rounded-lg px-3 py-1 text-xs font-medium text-slate-400 cursor-not-allowed">
+                <span className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-400 cursor-not-allowed">
                   Timeline
                 </span>
               </div>
             </div>
 
-            {/* Filter Toolbar (Search + Dept Filters + Date) */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              {/* Date Badge */}
-              <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 font-medium shadow-2xs">
+            {/* Filter Toolbar */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Date */}
+              <div className="hidden sm:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 font-medium shadow-2xs">
                 <img
                   src="/assets/navigation/calendar.svg"
                   alt="Calendar"
-                  className="h-3.5 w-3.5 opacity-60"
+                  className="h-3 w-3 opacity-60"
                 />
-                <span>Mar 11, 2025</span>
+                <span>Sprint 42</span>
               </div>
-
-              {/* Filter Button */}
-              <button
-                type="button"
-                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 font-medium hover:bg-slate-50 shadow-2xs"
-              >
-                <img
-                  src="/assets/navigation/filter.svg"
-                  alt="Filter"
-                  className="h-3.5 w-3.5 opacity-60"
-                />
-                <span>Filter</span>
-              </button>
 
               {/* Search */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                 <input
                   type="search"
                   value={searchTitle}
                   onChange={(e) => setSearchTitle(e.target.value)}
                   placeholder="Filter tasks..."
-                  className="w-40 sm:w-48 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none transition-colors shadow-2xs"
+                  className="w-36 sm:w-44 rounded-lg border border-slate-200 bg-white pl-8 pr-2.5 py-1 text-xs text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none transition-colors shadow-2xs"
                 />
               </div>
 
@@ -339,7 +316,7 @@ export default function ProjectDetailPage({
                       key={dept}
                       type="button"
                       onClick={() => setSelectedDept(dept)}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                      className={`px-2 py-0.5 rounded text-[10.5px] font-medium transition-all ${
                         isActive
                           ? 'bg-slate-900 text-white font-bold shadow-2xs'
                           : 'text-slate-600 hover:text-slate-900'
@@ -355,26 +332,23 @@ export default function ProjectDetailPage({
 
           {/* Client Guest Mode Notice */}
           {user.role === 'CLIENT_GUEST' && (
-            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-xs text-amber-900 flex items-start gap-3 shadow-2xs">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
-              <div>
-                <p className="font-bold text-amber-950">
-                  Mode Isolasi Multi-Tenant & API Data Masking Aktif (Client Guest View)
-                </p>
-                <p className="mt-0.5 text-[11px] text-amber-800">
-                  Hanya tugas bertanda <code>isClientVisible = true</code> yang ditampilkan. Seluruh
-                  nama engineer internal, email, dan riwayat audit trail dimasking otomatis oleh
-                  backend.
-                </p>
+            <div className="shrink-0 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 flex items-center justify-between shadow-2xs">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
+                <span className="text-[11px] font-medium">
+                  <strong>Client Guest Portal:</strong> Hanya tugas bertanda{' '}
+                  <code>isClientVisible = true</code> yang ditampilkan. Identitas internal
+                  disamarkan.
+                </span>
               </div>
             </div>
           )}
 
-          {/* Action Feedback / 409 Conflict Alert */}
+          {/* Action Feedback Banner */}
           {actionFeedback && (
             <div
               role="alert"
-              className={`flex items-center justify-between rounded-xl border p-3.5 text-xs font-medium shadow-2xs ${
+              className={`shrink-0 flex items-center justify-between rounded-lg border px-3 py-2 text-xs font-medium shadow-2xs ${
                 actionFeedback.type === 'conflict'
                   ? 'border-amber-300 bg-amber-50 text-amber-900'
                   : actionFeedback.type === 'error'
@@ -388,12 +362,12 @@ export default function ProjectDetailPage({
                 ) : (
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                 )}
-                <span>
+                <span className="text-[11px]">
                   <strong>
                     {actionFeedback.type === 'conflict'
-                      ? '409 Concurrency Conflict: '
+                      ? '409 Conflict: '
                       : actionFeedback.type === 'error'
-                        ? 'Action Blocked: '
+                        ? 'Ditolak: '
                         : 'Sukses: '}
                   </strong>
                   {actionFeedback.message}
@@ -405,27 +379,27 @@ export default function ProjectDetailPage({
                   setActionFeedback(null);
                   tasksQuery.refetch();
                 }}
-                className="ml-4 shrink-0 rounded bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 border border-slate-300 hover:bg-slate-100"
+                className="ml-3 shrink-0 rounded bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 border border-slate-300 hover:bg-slate-100"
               >
-                Dismiss
+                Tutup
               </button>
             </div>
           )}
 
           {/* ─────────────────────────────────────────────────────────────
-              3. FOUR (4) KANBAN COLUMNS (Matching Canvaso Reference)
+              3. FOUR (4) KANBAN COLUMNS (Zero Window Scroll, Sleek Column Scroll)
              ───────────────────────────────────────────────────────────── */}
           {tasksQuery.isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
               {[1, 2, 3, 4].map((n) => (
                 <div
                   key={n}
-                  className="h-96 rounded-2xl border border-slate-200 bg-white p-4 animate-pulse shadow-xs"
+                  className="h-full rounded-2xl border border-slate-200 bg-white p-4 animate-pulse shadow-xs"
                 />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+            <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 items-stretch">
               {KANBAN_COLUMNS.map((col) => {
                 const colTasks = tasks.filter((t) => t.status === col.status);
 
@@ -433,10 +407,10 @@ export default function ProjectDetailPage({
                   <section
                     key={col.status}
                     aria-label={col.title}
-                    className="flex flex-col rounded-2xl border border-slate-200/80 bg-[#f8fafc] overflow-hidden shadow-xs min-h-[500px]"
+                    className="flex flex-col h-full rounded-xl border border-slate-200/80 bg-[#f8fafc] overflow-hidden shadow-xs"
                   >
-                    {/* Column Header matching Reference Canvaso UI with SVG Status Icon */}
-                    <div className="flex items-center justify-between p-3.5 border-b border-slate-200/60 bg-white">
+                    {/* Column Header */}
+                    <div className="shrink-0 flex items-center justify-between px-3.5 py-2.5 border-b border-slate-200/60 bg-white">
                       <div className="flex items-center gap-2">
                         <img src={col.iconSrc} alt={col.title} className="h-4 w-4 object-contain" />
                         <h2 className="text-xs font-bold text-slate-800 tracking-tight">
@@ -472,11 +446,11 @@ export default function ProjectDetailPage({
                       </div>
                     </div>
 
-                    {/* Cards Container */}
-                    <div className="flex-1 p-3 space-y-3 overflow-y-auto max-h-[calc(100vh-280px)] custom-scrollbar">
+                    {/* Cards Container with Sleek ClickUp-style Scrollbar */}
+                    <div className="flex-1 min-h-0 p-2.5 space-y-2.5 overflow-y-auto kanban-scrollbar">
                       {colTasks.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-xs text-slate-400 bg-white/40">
-                          No tasks in {col.title}
+                        <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400 bg-white/40">
+                          Belum ada tugas di {col.title}
                         </div>
                       ) : (
                         colTasks.map((task) => {
@@ -497,26 +471,20 @@ export default function ProjectDetailPage({
                           return (
                             <article
                               key={task.id}
-                              className="group rounded-xl border border-slate-200/90 bg-white p-3.5 hover:border-slate-300 hover:shadow-md transition-all duration-200 shadow-xs flex flex-col justify-between"
+                              className="group rounded-xl border border-slate-200/90 bg-white p-3 hover:border-slate-300 hover:shadow-md transition-all duration-150 shadow-2xs flex flex-col justify-between gap-2.5"
                             >
-                              <div>
-                                {/* Top Meta: Priority Pill + Department Badge + Version Pill + Assignee */}
-                                <div className="flex items-center justify-between gap-1 mb-2">
+                              <div className="space-y-1.5">
+                                {/* Top Meta Row: Priority Badge + Dept Badge + Assignee */}
+                                <div className="flex items-center justify-between gap-1.5">
                                   <div className="flex items-center gap-1.5 flex-wrap">
                                     <PriorityBadge priority={priority} />
                                     <DepartmentBadge department={task.department} />
-                                    <span
-                                      title="Optimistic Locking Version Counter"
-                                      className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-slate-600"
-                                    >
-                                      v{task.version}
-                                    </span>
                                   </div>
 
-                                  {/* Assignee Avatar with SVG */}
+                                  {/* Assignee Avatar */}
                                   <div className="flex items-center shrink-0">
                                     {user.role === 'CLIENT_GUEST' ? (
-                                      <span className="text-[10px] text-slate-400 italic">
+                                      <span className="text-[9.5px] text-slate-400 italic">
                                         Masked
                                       </span>
                                     ) : task.assignee ? (
@@ -524,10 +492,12 @@ export default function ProjectDetailPage({
                                         src={assigneeAvatar}
                                         alt={task.assignee.name}
                                         title={`Assignee: ${task.assignee.name}`}
-                                        className="h-6 w-6 rounded-full object-cover ring-1 ring-slate-200 shadow-2xs"
+                                        className="h-5 w-5 rounded-full object-cover ring-1 ring-slate-200 shadow-2xs"
                                       />
                                     ) : (
-                                      <span className="text-[10px] text-slate-400">Unassigned</span>
+                                      <span className="text-[9.5px] text-slate-400">
+                                        Unassigned
+                                      </span>
                                     )}
                                   </div>
                                 </div>
@@ -536,84 +506,115 @@ export default function ProjectDetailPage({
                                 <h3 className="text-xs font-bold text-slate-900 tracking-tight leading-snug group-hover:text-blue-600 transition-colors">
                                   <Link
                                     href={`/projects/${projectId}/tasks/${task.id}`}
-                                    className="focus:outline-none"
+                                    className="focus:outline-none block"
                                   >
                                     {task.title}
                                   </Link>
                                 </h3>
 
-                                {/* Task Description / Subtitle */}
-                                <p className="mt-1 line-clamp-2 text-[11px] text-slate-500 leading-relaxed">
-                                  {task.description ||
-                                    'Using tools for upcoming design review and development..'}
-                                </p>
-
-                                {/* DAG Prerequisites Checklist (if any) */}
-                                {deps.length > 0 && (
-                                  <div className="mt-2.5 rounded-lg border border-slate-200 bg-slate-50 p-2 text-[10px]">
-                                    <div className="flex items-center justify-between text-slate-600 font-semibold mb-1">
-                                      <span className="flex items-center gap-1">
-                                        <GitBranch className="h-3 w-3 text-blue-600" />
-                                        DAG Prerequisites:
-                                      </span>
-                                      <span className="font-mono">
-                                        {
-                                          deps.filter((d) => d.prerequisite.status === 'DONE')
-                                            .length
-                                        }
-                                        /{deps.length}
-                                      </span>
-                                    </div>
-                                    <div className="space-y-1">
-                                      {deps.map((dep) => {
-                                        const isPrereqDone = dep.prerequisite.status === 'DONE';
-                                        return (
-                                          <div
-                                            key={dep.id}
-                                            className={`flex items-center justify-between gap-1 rounded px-1.5 py-0.5 ${
-                                              isPrereqDone
-                                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                                : 'bg-rose-50 text-rose-800 border border-rose-200 font-medium'
-                                            }`}
-                                          >
-                                            <span className="truncate">
-                                              {isPrereqDone ? '✓ ' : '✕ '}
-                                              {dep.prerequisite.title}
-                                            </span>
-                                            <span className="font-mono text-[9px] uppercase">
-                                              {dep.prerequisite.status}
-                                            </span>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
+                                {/* 1-Line Clean Subtitle / Description */}
+                                {task.description && (
+                                  <p className="text-[10.5px] text-slate-500 truncate leading-relaxed">
+                                    {task.description}
+                                  </p>
                                 )}
 
-                                {/* Blocked Warning Notice */}
-                                {unfulfilledDeps.length > 0 && (
-                                  <div className="mt-2 rounded-md border border-rose-200 bg-rose-50 px-2 py-1 text-[10px] font-semibold text-rose-800 flex items-center gap-1.5">
-                                    <Lock className="h-3 w-3 shrink-0" />
-                                    <span>
-                                      Terkunci: Menunggu {unfulfilledDeps.length} prerequisite
-                                      (DONE)
-                                    </span>
+                                {/* DAG Dependency Pill with Interactive (i) Tooltip */}
+                                {deps.length > 0 && (
+                                  <div className="pt-0.5">
+                                    {unfulfilledDeps.length > 0 ? (
+                                      <div className="relative group/dag inline-flex items-center justify-between w-full rounded-md bg-amber-50/80 border border-amber-200/70 px-2 py-1 text-[10px] text-amber-900 cursor-help">
+                                        <div className="flex items-center gap-1.5 min-w-0">
+                                          <img
+                                            src="/assets/navigation/lock.svg"
+                                            alt="Lock"
+                                            className="h-3 w-3 shrink-0 opacity-70"
+                                          />
+                                          <span className="font-semibold truncate">
+                                            {unfulfilledDeps.length} Prasyarat Menunggu
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1 shrink-0 text-amber-700 font-mono text-[9px]">
+                                          <span>
+                                            {deps.length - unfulfilledDeps.length}/{deps.length}
+                                          </span>
+                                          <img
+                                            src="/assets/navigation/info.svg"
+                                            alt="Detail"
+                                            className="h-3 w-3 opacity-60 group-hover/dag:opacity-100"
+                                          />
+                                        </div>
+
+                                        {/* Floating Tooltip popover showing prerequisite checklist */}
+                                        <div className="absolute left-0 bottom-full mb-1.5 hidden group-hover/dag:block z-50 w-64 rounded-xl border border-slate-200 bg-white p-2.5 shadow-xl text-left pointer-events-none">
+                                          <div className="flex items-center gap-1 text-[10px] font-bold text-slate-800 mb-1.5 pb-1 border-b border-slate-100">
+                                            <img
+                                              src="/assets/navigation/info.svg"
+                                              alt=""
+                                              className="h-3 w-3"
+                                            />
+                                            <span>Prasyarat DAG Yang Dibutuhkan:</span>
+                                          </div>
+                                          <div className="space-y-1">
+                                            {deps.map((dep) => {
+                                              const isDone = dep.prerequisite.status === 'DONE';
+                                              return (
+                                                <div
+                                                  key={dep.id}
+                                                  className="flex items-center justify-between gap-1 text-[9.5px]"
+                                                >
+                                                  <span className="truncate text-slate-600 flex items-center gap-1">
+                                                    <span
+                                                      className={
+                                                        isDone
+                                                          ? 'text-emerald-600 font-bold'
+                                                          : 'text-rose-500 font-bold'
+                                                      }
+                                                    >
+                                                      {isDone ? '✓' : '✕'}
+                                                    </span>
+                                                    {dep.prerequisite.title}
+                                                  </span>
+                                                  <span
+                                                    className={`font-mono font-bold text-[8.5px] uppercase ${
+                                                      isDone ? 'text-emerald-600' : 'text-amber-600'
+                                                    }`}
+                                                  >
+                                                    {dep.prerequisite.status}
+                                                  </span>
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center gap-1 text-[10px] text-emerald-700 font-medium">
+                                        <img
+                                          src="/assets/navigation/check.svg"
+                                          alt="Done"
+                                          className="h-3 w-3"
+                                        />
+                                        <span>
+                                          Prasyarat Terpenuhi ({deps.length}/{deps.length})
+                                        </span>
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </div>
 
-                              {/* Footer: Quick Actions & Card Meta Icons */}
-                              <div className="mt-3 pt-2.5 border-t border-slate-100">
+                              {/* Card Actions & Meta Footer */}
+                              <div className="space-y-2 pt-2 border-t border-slate-100">
+                                {/* Action Buttons Row */}
                                 {user.role !== 'CLIENT_GUEST' && (
-                                  <div className="space-y-1.5">
-                                    <div className="flex items-center gap-1.5">
-                                      {task.status !== 'IN_PROGRESS' && task.status !== 'DONE' && (
+                                  <div className="flex items-center gap-1.5">
+                                    {task.status !== 'IN_PROGRESS' &&
+                                      task.status !== 'DONE' &&
+                                      (startEval.allowed ? (
                                         <button
                                           type="button"
-                                          disabled={!startEval.allowed || statusMutation.isPending}
-                                          title={
-                                            startEval.reason || 'Pindahkan status ke In Progress'
-                                          }
+                                          disabled={statusMutation.isPending}
                                           onClick={() =>
                                             statusMutation.mutate({
                                               taskId: task.id,
@@ -621,17 +622,52 @@ export default function ProjectDetailPage({
                                               version: task.version,
                                             })
                                           }
-                                          className="flex-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white py-1 text-[10.5px] font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+                                          className="flex-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white py-1 text-[10.5px] font-bold transition-all shadow-2xs"
                                         >
-                                          {startEval.allowed ? 'Mulai' : 'Terkunci (Start)'}
+                                          Mulai
                                         </button>
-                                      )}
+                                      ) : (
+                                        <div className="relative group/lock flex-1 flex items-center">
+                                          <button
+                                            type="button"
+                                            disabled
+                                            className="w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-400 py-1 text-[10.5px] font-medium cursor-not-allowed flex items-center justify-center gap-1"
+                                          >
+                                            <img
+                                              src="/assets/navigation/lock.svg"
+                                              alt="Lock"
+                                              className="h-2.5 w-2.5 opacity-40"
+                                            />
+                                            <span>Terkunci</span>
+                                            <img
+                                              src="/assets/navigation/info.svg"
+                                              alt="Alasan"
+                                              className="h-2.5 w-2.5 opacity-50"
+                                            />
+                                          </button>
+                                          {/* Hover Info Tooltip */}
+                                          <div className="absolute left-0 bottom-full mb-1.5 hidden group-hover/lock:block z-50 w-60 rounded-xl border border-slate-200 bg-white p-2.5 shadow-xl text-left pointer-events-none">
+                                            <p className="font-bold text-[10px] text-slate-900 mb-0.5 flex items-center gap-1">
+                                              <img
+                                                src="/assets/navigation/info.svg"
+                                                alt=""
+                                                className="h-3 w-3"
+                                              />
+                                              Alasan Terkunci:
+                                            </p>
+                                            <p className="text-[10px] text-slate-600 leading-relaxed">
+                                              {startEval.reason ||
+                                                'Menunggu seluruh prasyarat diselesaikan.'}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))}
 
-                                      {task.status === 'IN_PROGRESS' && (
+                                    {task.status === 'IN_PROGRESS' &&
+                                      (doneEval.allowed ? (
                                         <button
                                           type="button"
-                                          disabled={!doneEval.allowed || statusMutation.isPending}
-                                          title={doneEval.reason || 'Tandai tugas selesai (DONE)'}
+                                          disabled={statusMutation.isPending}
                                           onClick={() =>
                                             statusMutation.mutate({
                                               taskId: task.id,
@@ -639,65 +675,80 @@ export default function ProjectDetailPage({
                                               version: task.version,
                                             })
                                           }
-                                          className="flex-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white py-1 text-[10.5px] font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+                                          className="flex-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white py-1 text-[10.5px] font-bold transition-all shadow-2xs"
                                         >
-                                          {doneEval.allowed ? 'Selesai (Done)' : 'Terkunci (Done)'}
+                                          Selesai
                                         </button>
-                                      )}
+                                      ) : (
+                                        <div className="relative group/lock flex-1 flex items-center">
+                                          <button
+                                            type="button"
+                                            disabled
+                                            className="w-full rounded-lg bg-slate-100 border border-slate-200 text-slate-400 py-1 text-[10.5px] font-medium cursor-not-allowed flex items-center justify-center gap-1"
+                                          >
+                                            <img
+                                              src="/assets/navigation/lock.svg"
+                                              alt="Lock"
+                                              className="h-2.5 w-2.5 opacity-40"
+                                            />
+                                            <span>Terkunci</span>
+                                            <img
+                                              src="/assets/navigation/info.svg"
+                                              alt="Alasan"
+                                              className="h-2.5 w-2.5 opacity-50"
+                                            />
+                                          </button>
+                                          {/* Hover Info Tooltip */}
+                                          <div className="absolute left-0 bottom-full mb-1.5 hidden group-hover/lock:block z-50 w-60 rounded-xl border border-slate-200 bg-white p-2.5 shadow-xl text-left pointer-events-none">
+                                            <p className="font-bold text-[10px] text-slate-900 mb-0.5 flex items-center gap-1">
+                                              <img
+                                                src="/assets/navigation/info.svg"
+                                                alt=""
+                                                className="h-3 w-3"
+                                              />
+                                              Alasan Pembatasan ABAC:
+                                            </p>
+                                            <p className="text-[10px] text-slate-600 leading-relaxed">
+                                              {doneEval.reason ||
+                                                'Hanya engineer departemen yang ditugaskan yang dapat menyelesaikan tugas ini.'}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))}
 
-                                      <Link
-                                        href={`/projects/${projectId}/tasks/${task.id}`}
-                                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[10.5px] font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-2xs"
-                                      >
-                                        Detail
-                                      </Link>
-                                    </div>
-
-                                    {/* Locked reason banner */}
-                                    {task.status !== 'IN_PROGRESS' &&
-                                      task.status !== 'DONE' &&
-                                      !startEval.allowed &&
-                                      startEval.reason && (
-                                        <p className="text-[9.5px] text-rose-600 leading-tight font-medium">
-                                          {startEval.reason}
-                                        </p>
-                                      )}
-
-                                    {task.status === 'IN_PROGRESS' &&
-                                      !doneEval.allowed &&
-                                      doneEval.reason && (
-                                        <p className="text-[9.5px] text-rose-600 leading-tight font-medium">
-                                          {doneEval.reason}
-                                        </p>
-                                      )}
+                                    <Link
+                                      href={`/projects/${projectId}/tasks/${task.id}`}
+                                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[10.5px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-2xs"
+                                    >
+                                      Detail
+                                    </Link>
                                   </div>
                                 )}
 
-                                {/* Card Bottom Details matching Reference UI: Calendar + Attachments + Comments */}
-                                <div className="mt-2.5 flex items-center justify-between text-[10px] text-slate-500 font-medium">
-                                  <div className="flex items-center gap-1.5">
+                                {/* Bottom Metadata: Date, Attachments, Comments, Version */}
+                                <div className="flex items-center justify-between text-[9.5px] text-slate-400 font-medium pt-0.5">
+                                  <div className="flex items-center gap-1">
                                     <img
                                       src="/assets/navigation/calendar.svg"
                                       alt="Date"
-                                      className="h-3 w-3 opacity-60"
+                                      className="h-2.5 w-2.5 opacity-50"
                                     />
                                     <span>
                                       {task.createdAt
                                         ? new Date(task.createdAt).toLocaleDateString('en-US', {
                                             month: 'short',
                                             day: 'numeric',
-                                            year: 'numeric',
                                           })
-                                        : 'Mar 10, 2024'}
+                                        : 'Recent'}
                                     </span>
                                   </div>
 
-                                  <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-1" title="Attachments">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="flex items-center gap-0.5" title="Lampiran">
                                       <img
                                         src="/assets/navigation/attachment.svg"
                                         alt="Attachments"
-                                        className="h-3 w-3 opacity-60"
+                                        className="h-2.5 w-2.5 opacity-50"
                                       />
                                       <span>
                                         {task.attachments?.length ||
@@ -705,34 +756,32 @@ export default function ProjectDetailPage({
                                       </span>
                                     </div>
 
-                                    <div className="flex items-center gap-1" title="Comments">
+                                    <div
+                                      className="flex items-center gap-0.5"
+                                      title="Riwayat / Diskusi"
+                                    >
                                       <img
                                         src="/assets/navigation/comment.svg"
                                         alt="Comments"
-                                        className="h-3 w-3 opacity-60"
+                                        className="h-2.5 w-2.5 opacity-50"
                                       />
                                       <span>
                                         {task.auditLogs?.length || task.id.charCodeAt(1) % 4}
                                       </span>
                                     </div>
+
+                                    <span
+                                      title="Versi Optimistic Concurrency"
+                                      className="font-mono text-[9px] text-slate-400"
+                                    >
+                                      v{task.version}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
                             </article>
                           );
                         })
-                      )}
-
-                      {/* Add Task footer button matching Canvaso UI */}
-                      {user.role === 'PM' && col.status === 'TODO' && (
-                        <button
-                          type="button"
-                          onClick={() => setIsCreateTaskOpen(true)}
-                          className="w-full py-2 rounded-xl border border-dashed border-slate-300 hover:border-slate-400 bg-white/70 hover:bg-white text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
-                        >
-                          <Plus className="h-3.5 w-3.5" />
-                          <span>Add Task</span>
-                        </button>
                       )}
                     </div>
                   </section>
