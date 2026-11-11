@@ -86,20 +86,20 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="create-project-title"
     >
-      <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-          <h2 id="create-project-title" className="text-lg font-bold text-slate-900">
+      <div className="w-full max-w-lg rounded-2xl border border-zinc-800 bg-[#0d0f14] p-6 shadow-2xl text-zinc-100">
+        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+          <h2 id="create-project-title" className="text-lg font-bold text-white tracking-tight">
             Buat Proyek Baru
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md px-2.5 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            className="rounded-lg px-2.5 py-1 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
           >
             Tutup (Esc)
           </button>
@@ -107,13 +107,13 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
 
         <form onSubmit={handleSubmit((vals) => mutation.mutate(vals))} className="mt-4 space-y-4">
           {serverError && (
-            <div className="rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900">
+            <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
               {serverError}
             </div>
           )}
 
           <div>
-            <label htmlFor="project-name" className="block text-sm font-semibold text-slate-800">
+            <label htmlFor="project-name" className="block text-xs font-medium text-zinc-300">
               Nama Proyek *
             </label>
             <input
@@ -121,15 +121,15 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
               type="text"
               placeholder="Contoh: Sistem ERP Logistik Nasional"
               {...register('name')}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-[#0052CC] focus:outline-2 focus:outline-[#0052CC]"
+              className="mt-1 w-full rounded-lg border border-zinc-800 bg-[#090b0e] px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:border-zinc-500 focus:outline-none transition-colors"
             />
             {errors.name && (
-              <p className="mt-1 text-xs font-medium text-rose-700">{errors.name.message}</p>
+              <p className="mt-1 text-xs font-medium text-rose-400">{errors.name.message}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="client-name" className="block text-sm font-semibold text-slate-800">
+            <label htmlFor="client-name" className="block text-xs font-medium text-zinc-300">
               Nama Perusahaan Klien *
             </label>
             <input
@@ -137,21 +137,21 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
               type="text"
               placeholder="Contoh: PT Maju Jaya"
               {...register('clientName')}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-[#0052CC] focus:outline-2 focus:outline-[#0052CC]"
+              className="mt-1 w-full rounded-lg border border-zinc-800 bg-[#090b0e] px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:border-zinc-500 focus:outline-none transition-colors"
             />
             {errors.clientName && (
-              <p className="mt-1 text-xs font-medium text-rose-700">{errors.clientName.message}</p>
+              <p className="mt-1 text-xs font-medium text-rose-400">{errors.clientName.message}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="client-account" className="block text-sm font-semibold text-slate-800">
+            <label htmlFor="client-account" className="block text-xs font-medium text-zinc-300">
               Hubungkan ke Akun Client Guest (Multi-Tenant Isolation)
             </label>
             <select
               id="client-account"
               {...register('clientId')}
-              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-[#0052CC] focus:outline-2 focus:outline-[#0052CC]"
+              className="mt-1 w-full rounded-lg border border-zinc-800 bg-[#090b0e] px-3.5 py-2 text-xs text-white focus:border-zinc-500 focus:outline-none transition-colors"
             >
               <option value="">Tidak dihubungkan</option>
               {clientUsers.map((client) => (
@@ -163,7 +163,7 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
           </div>
 
           <div>
-            <label htmlFor="project-desc" className="block text-sm font-semibold text-slate-800">
+            <label htmlFor="project-desc" className="block text-xs font-medium text-zinc-300">
               Deskripsi Proyek
             </label>
             <textarea
@@ -171,22 +171,22 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
               rows={3}
               placeholder="Ruang lingkup deliverables dan target utama..."
               {...register('description')}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-[#0052CC] focus:outline-2 focus:outline-[#0052CC]"
+              className="mt-1 w-full rounded-lg border border-zinc-800 bg-[#090b0e] px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:border-zinc-500 focus:outline-none transition-colors"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-slate-200 pt-4">
+          <div className="flex items-center justify-end gap-3 border-t border-zinc-800/80 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="min-h-[44px] rounded-lg bg-[#0052CC] px-5 py-2 text-sm font-semibold text-white hover:bg-[#003E99] disabled:opacity-60"
+              className="rounded-lg bg-white px-5 py-2 text-xs font-semibold text-black hover:bg-zinc-200 transition-colors disabled:opacity-60"
             >
               {mutation.isPending ? 'Menyimpan...' : 'Simpan Proyek'}
             </button>

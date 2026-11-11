@@ -24,7 +24,12 @@ export function Navbar() {
   const { user, setAuth, clearAuth } = useAuthStore();
   const [switchingEmail, setSwitchingEmail] = useState<string | null>(null);
 
-  if (pathname === '/login' || pathname === '/register') {
+  if (
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/dashboard' ||
+    pathname.startsWith('/dashboard')
+  ) {
     return null;
   }
 
