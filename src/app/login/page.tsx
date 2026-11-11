@@ -16,7 +16,7 @@ const SEEDED_PERSONAS = [
     role: 'Product Manager',
     dept: 'PRODUCT',
     email: 'pm@nodewave.id',
-    avatarBg: 'bg-indigo-600/20 text-indigo-400 border-indigo-500/30',
+    avatarBg: 'bg-indigo-600/20 border-indigo-500/30',
   },
   {
     initials: 'SR',
@@ -24,7 +24,7 @@ const SEEDED_PERSONAS = [
     role: 'UI/UX Designer',
     dept: 'UIUX',
     email: 'uiux@nodewave.id',
-    avatarBg: 'bg-purple-600/20 text-purple-400 border-purple-500/30',
+    avatarBg: 'bg-purple-600/20 border-purple-500/30',
   },
   {
     initials: 'BS',
@@ -32,7 +32,7 @@ const SEEDED_PERSONAS = [
     role: 'Frontend Engineer',
     dept: 'FRONTEND',
     email: 'frontend@nodewave.id',
-    avatarBg: 'bg-emerald-600/20 text-emerald-400 border-emerald-500/30',
+    avatarBg: 'bg-emerald-600/20 border-emerald-500/30',
   },
   {
     initials: 'EW',
@@ -40,7 +40,7 @@ const SEEDED_PERSONAS = [
     role: 'Backend Engineer',
     dept: 'BACKEND',
     email: 'backend@nodewave.id',
-    avatarBg: 'bg-amber-600/20 text-amber-400 border-amber-500/30',
+    avatarBg: 'bg-amber-600/20 border-amber-500/30',
   },
   {
     initials: 'MJ',
@@ -48,7 +48,7 @@ const SEEDED_PERSONAS = [
     role: 'Client Guest',
     dept: 'CLIENT',
     email: 'client@guest.com',
-    avatarBg: 'bg-yellow-600/20 text-yellow-400 border-yellow-500/30',
+    avatarBg: 'bg-yellow-600/20 border-yellow-500/30',
     fullWidth: true,
   },
 ];
@@ -64,7 +64,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  // WebGL Interactive Dot Matrix Canvas Background
+  // WebGL Interactive Dot Matrix Canvas Background (Original 21st.dev template settings)
   useEffect(() => {
     let active = true;
     let renderer: any;
@@ -87,7 +87,7 @@ export default function LoginPage() {
       const uniforms = {
         u_time: { value: 0 },
         u_resolution: { value: new THREE.Vector2(window.innerWidth * 2, window.innerHeight * 2) },
-        u_opacities: { value: [0.15, 0.2, 0.25, 0.35, 0.45, 0.55, 0.7, 0.8, 0.9, 1.0] },
+        u_opacities: { value: [0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1.0] },
         u_colors: {
           value: [
             new THREE.Vector3(1, 1, 1),
@@ -98,8 +98,8 @@ export default function LoginPage() {
             new THREE.Vector3(1, 1, 1),
           ],
         },
-        u_total_size: { value: 24.0 },
-        u_dot_size: { value: 4.5 },
+        u_total_size: { value: 20.0 },
+        u_dot_size: { value: 6.0 },
         u_reverse: { value: 0 },
       };
 
@@ -124,6 +124,7 @@ export default function LoginPage() {
           uniform float u_total_size;
           uniform float u_dot_size;
           uniform vec2 u_resolution;
+          uniform int u_reverse;
 
           out vec4 fragColor;
 
@@ -141,7 +142,7 @@ export default function LoginPage() {
 
               vec2 st2 = vec2(int(st.x / u_total_size), int(st.y / u_total_size));
 
-              float frequency = 4.0;
+              float frequency = 5.0;
               float show_offset = random(st2);
               float rand = random(st2 * floor((u_time / frequency) + show_offset + frequency));
               opacity *= u_opacities[int(rand * 10.0)];
@@ -150,14 +151,17 @@ export default function LoginPage() {
 
               vec3 color = u_colors[int(show_offset * 6.0)];
 
-              float animation_speed_factor = 2.2;
+              float animation_speed_factor = 3.0;
               vec2 center_grid = u_resolution / 2.0 / u_total_size;
               float dist_from_center = distance(center_grid, st2);
 
               float timing_offset_intro = dist_from_center * 0.01 + (random(st2) * 0.15);
-              opacity *= step(timing_offset_intro, u_time * animation_speed_factor);
 
-              fragColor = vec4(color, opacity * 0.75);
+              float current_timing_offset = timing_offset_intro;
+              opacity *= step(current_timing_offset, u_time * animation_speed_factor);
+              opacity *= clamp((1.0 - step(current_timing_offset + 0.1, u_time * animation_speed_factor)) * 1.25, 1.0, 1.25);
+
+              fragColor = vec4(color, opacity);
               fragColor.rgb *= fragColor.a;
           }
         `,
@@ -249,33 +253,37 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-[#07080a] text-zinc-100 flex flex-col items-center justify-center p-3 sm:p-4 font-sans selection:bg-zinc-800">
+    <div className="relative h-screen max-h-screen w-full overflow-hidden bg-[#07080a] text-zinc-100 flex flex-col items-center justify-center p-3 sm:p-4 font-sans selection:bg-zinc-800">
       {/* WebGL Dot Matrix Canvas Background */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
 
-      {/* Subtle Radial Vignette Mask */}
-      <div className="absolute inset-0 z-1 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.96)_100%)]" />
+      {/* Original 21st.dev Template Vignette Gradient */}
+      <div className="absolute inset-0 z-1 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.98)_100%)]" />
 
-      {/* Top Brand Header with Official NodeWave Logo */}
-      <div className="relative z-10 mb-2.5 text-center">
-        <div className="flex items-center justify-center gap-2">
-          <div className="relative h-6 w-6 shrink-0">
+      {/* Top Brand Header with Larger Official NodeWave Logo */}
+      <div className="relative z-10 mb-2 sm:mb-2.5 text-center">
+        <div className="flex items-center justify-center gap-3">
+          <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0">
             <Image
               src="/nodewave-logo.png"
               alt="NodeWave Logo"
-              width={24}
-              height={24}
-              className="h-6 w-6 object-contain"
+              width={48}
+              height={48}
+              className="h-full w-full object-contain filter drop-shadow-[0_2px_10px_rgba(255,255,255,0.15)]"
               priority
             />
           </div>
-          <span className="text-lg font-bold tracking-tight text-white">NodeWave</span>
+          <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+            NodeWave
+          </span>
         </div>
-        <p className="text-[11px] text-zinc-400 font-medium">Deliverables Management System</p>
+        <p className="mt-0.5 text-xs text-zinc-400 font-medium tracking-wide">
+          Deliverables Management System
+        </p>
       </div>
 
       {/* Main Glass/Matte Login Card (Strict Compact Viewport Fit - No Scroll) */}
-      <div className="relative z-10 w-full max-w-[480px] rounded-2xl border border-zinc-800/80 bg-[#0d0f14]/92 backdrop-blur-xl px-6 py-5 sm:px-7 sm:py-5 shadow-2xl shadow-black/90">
+      <div className="relative z-10 w-full max-w-[480px] rounded-2xl border border-zinc-800/80 bg-[#0d0f14]/92 backdrop-blur-xl px-6 py-4.5 sm:px-7 sm:py-5 shadow-2xl shadow-black/90">
         {/* Secure Workspace Pill */}
         <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/40 px-2 py-0.5 text-[10px] font-medium tracking-wider text-zinc-300">
           <Shield className="h-3 w-3 text-zinc-400" />
@@ -283,8 +291,8 @@ export default function LoginPage() {
         </div>
 
         {/* Heading */}
-        <div className="mt-2.5">
-          <h1 className="text-xl font-bold tracking-tight text-white">Welcome back</h1>
+        <div className="mt-2">
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white">Welcome back</h1>
           <p className="mt-0.5 text-xs text-zinc-400">
             Sign in to access your projects and deliverables.
           </p>
@@ -298,7 +306,7 @@ export default function LoginPage() {
         )}
 
         {/* Form Inputs */}
-        <form onSubmit={handleSubmit} className="mt-3.5 space-y-2.5">
+        <form onSubmit={handleSubmit} className="mt-3 space-y-2">
           <div>
             <label htmlFor="email" className="block text-[11px] font-medium text-zinc-300">
               Email address
@@ -312,7 +320,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
-                className="w-full rounded-lg border border-zinc-800 bg-[#090b0e] pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-500 transition-colors focus:border-zinc-500 focus:outline-none"
+                className="w-full rounded-lg border border-zinc-800 bg-[#090b0e] pl-9 pr-3 py-1.5 sm:py-2 text-xs text-white placeholder-zinc-500 transition-colors focus:border-zinc-500 focus:outline-none"
               />
             </div>
           </div>
@@ -339,7 +347,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full rounded-lg border border-zinc-800 bg-[#090b0e] pl-9 pr-9 py-2 text-xs text-white placeholder-zinc-500 transition-colors focus:border-zinc-500 focus:outline-none"
+                className="w-full rounded-lg border border-zinc-800 bg-[#090b0e] pl-9 pr-9 py-1.5 sm:py-2 text-xs text-white placeholder-zinc-500 transition-colors focus:border-zinc-500 focus:outline-none"
               />
               <button
                 type="button"
@@ -366,17 +374,17 @@ export default function LoginPage() {
         </form>
 
         {/* Divider */}
-        <div className="relative my-3 text-center">
+        <div className="relative my-2.5 text-center">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-zinc-800/80" />
           </div>
-          <span className="relative bg-[#0d0f14] px-2.5 text-[9px] font-semibold tracking-wider text-zinc-500 uppercase">
+          <span className="relative bg-[#0d0f14] px-2 text-[9px] font-semibold tracking-wider text-zinc-500 uppercase">
             OR CONTINUE WITH A SEEDED DEMO PERSONA
           </span>
         </div>
 
-        {/* Seeded Persona Grid (2 Columns + 1 Full Width) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {/* Seeded Persona Grid with 3D Person Avatar Icons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
           {SEEDED_PERSONAS.map((persona) => {
             const isFullWidth = persona.fullWidth;
             return (
@@ -389,15 +397,21 @@ export default function LoginPage() {
                   setPassword('Password123!');
                   handleLogin(persona.email, 'Password123!');
                 }}
-                className={`group flex items-center justify-between rounded-lg border border-zinc-800/80 bg-[#0a0c10] p-2 text-left transition-all hover:border-zinc-700 hover:bg-zinc-800/30 active:scale-[0.99] ${
+                className={`group flex items-center justify-between rounded-lg border border-zinc-800/80 bg-[#0a0c10] p-1.5 sm:p-2 text-left transition-all hover:border-zinc-700 hover:bg-zinc-800/30 active:scale-[0.99] ${
                   isFullWidth ? 'sm:col-span-2' : ''
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <div
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-[11px] font-bold ${persona.avatarBg}`}
+                    className={`relative flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg border overflow-hidden p-0.5 ${persona.avatarBg}`}
                   >
-                    {persona.initials}
+                    <Image
+                      src="/avatar-3d.png"
+                      alt={persona.name}
+                      width={32}
+                      height={32}
+                      className="h-full w-full object-contain filter drop-shadow-sm group-hover:scale-110 transition-transform duration-200"
+                    />
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-[11px] font-semibold text-zinc-200 group-hover:text-white">
@@ -416,14 +430,14 @@ export default function LoginPage() {
         </div>
 
         {/* Demo Accounts Credentials Note */}
-        <div className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-[10px] text-zinc-500">
+        <div className="mt-2 flex items-center justify-center gap-1.5 text-center text-[10px] text-zinc-500">
           <Info className="h-3 w-3 shrink-0" />
           <span>Demo accounts use seeded credentials (password: Password123!).</span>
         </div>
       </div>
 
       {/* Footer Below Card */}
-      <div className="relative z-10 mt-3 space-y-0.5 text-center text-[11px] text-zinc-500">
+      <div className="relative z-10 mt-2 sm:mt-2.5 space-y-0.5 text-center text-[11px] text-zinc-500">
         <div className="flex items-center justify-center gap-2 text-zinc-400">
           <span className="flex items-center gap-1">
             <Users className="h-3 w-3" />
