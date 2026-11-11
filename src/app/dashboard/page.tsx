@@ -16,9 +16,7 @@ import { useAuthStore } from '@/store/auth.store';
 import type { ApiListResponse, Project, User } from '@/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowUpRight,
   Calendar,
-  CheckCircle2,
   ChevronDown,
   Columns3,
   FolderGit2,
@@ -28,7 +26,6 @@ import {
   Plus,
   RefreshCw,
   Search,
-  TrendingDown,
   TrendingUp,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -611,165 +608,16 @@ export default function DashboardPage() {
           </div>
 
           {/* ─────────────────────────────────────────────────────────
-              ROW 2: ACTIVE PROJECTS MATRIX & STACKED TEAM DIRECTORY & DONUT
+              ROW 2: ACTIVE PROJECTS (STACKED LIST) & DAG READINESS (DONUT)
              ───────────────────────────────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5" id="projects-table">
-            {/* Left: Active Projects Table (lg:col-span-8) */}
-            <div className="lg:col-span-8 rounded-2xl border border-zinc-800/80 bg-[#0d0f14]/90 p-5 shadow-xl">
-              <div className="flex items-center justify-between pb-3 border-b border-zinc-800/60">
-                <div>
-                  <h2 className="text-base font-bold text-white tracking-tight">Active Projects</h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    Governed multi-disciplinary deliverables with DAG dependency tracking
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-500 font-medium">
-                    Showing <strong>{projects.length}</strong> projects
-                  </span>
-                </div>
-              </div>
-
-              {/* Table Data */}
-              {isLoading ? (
-                <div className="py-12 text-center text-xs text-zinc-500">
-                  <RefreshCw className="h-5 w-5 animate-spin mx-auto mb-2 text-zinc-400" />
-                  Loading projects matrix...
-                </div>
-              ) : projects.length === 0 ? (
-                <div className="py-12 text-center text-xs text-zinc-500">
-                  <p>No projects found matching current filters.</p>
-                </div>
-              ) : (
-                <div className="mt-3 overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-zinc-800/60 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
-                        <th className="py-2.5 px-3">Project Name</th>
-                        <th className="py-2.5 px-3">Client Org</th>
-                        <th className="py-2.5 px-3">Assigned Team</th>
-                        <th className="py-2.5 px-3">Progress</th>
-                        <th className="py-2.5 px-3">DAG Health</th>
-                        <th className="py-2.5 px-3 text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-800/40">
-                      {projects.map((p) => {
-                        const pct = Number.parseInt(p.metrics?.progress || '0', 10) || 0;
-                        const isAllDone = pct === 100;
-
-                        return (
-                          <tr key={p.id} className="group hover:bg-zinc-800/30 transition-colors">
-                            {/* Project Name & App Icon */}
-                            <td className="py-3 px-3">
-                              <div className="flex items-center gap-2.5">
-                                <div className="h-7 w-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-xs">
-                                  {p.name.charAt(0)}
-                                </div>
-                                <div className="min-w-0">
-                                  <Link
-                                    href={`/projects/${p.id}`}
-                                    className="font-semibold text-zinc-200 group-hover:text-white transition-colors block truncate max-w-[160px] sm:max-w-xs"
-                                  >
-                                    {p.name}
-                                  </Link>
-                                  <p className="text-[10px] text-zinc-500 truncate max-w-[160px] sm:max-w-xs">
-                                    {p.description || 'Deliverables Management'}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Client Organization */}
-                            <td className="py-3 px-3 font-medium text-zinc-300">
-                              <span className="rounded bg-zinc-800/60 px-2 py-0.5 text-[10.5px]">
-                                {p.clientName}
-                              </span>
-                            </td>
-
-                            {/* Team Multi-Disciplines */}
-                            <td className="py-3 px-3">
-                              <div className="flex -space-x-1.5 overflow-hidden">
-                                <span
-                                  title="Product Team"
-                                  className="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d0f14] bg-indigo-600/30 text-indigo-300 text-[8px] font-bold text-center leading-5"
-                                >
-                                  PM
-                                </span>
-                                <span
-                                  title="UI/UX Team"
-                                  className="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d0f14] bg-purple-600/30 text-purple-300 text-[8px] font-bold text-center leading-5"
-                                >
-                                  UI
-                                </span>
-                                <span
-                                  title="Frontend Team"
-                                  className="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d0f14] bg-emerald-600/30 text-emerald-300 text-[8px] font-bold text-center leading-5"
-                                >
-                                  FE
-                                </span>
-                                <span
-                                  title="Backend Team"
-                                  className="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d0f14] bg-amber-600/30 text-amber-300 text-[8px] font-bold text-center leading-5"
-                                >
-                                  BE
-                                </span>
-                              </div>
-                            </td>
-
-                            {/* Progress Bar */}
-                            <td className="py-3 px-3">
-                              <div className="w-28 space-y-1">
-                                <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400">
-                                  <span>
-                                    {p.metrics?.doneTasks || 0}/{p.metrics?.totalTasks || 0}
-                                  </span>
-                                  <span className="font-semibold text-white">
-                                    {p.metrics?.progress || '0%'}
-                                  </span>
-                                </div>
-                                <div className="h-1.5 w-full rounded-full bg-zinc-800 overflow-hidden">
-                                  <div
-                                    style={{ width: `${pct}%` }}
-                                    className={`h-full rounded-full transition-all duration-500 ${
-                                      isAllDone
-                                        ? 'bg-emerald-400'
-                                        : 'bg-gradient-to-r from-indigo-500 to-cyan-400'
-                                    }`}
-                                  />
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* DAG Prerequisite Health */}
-                            <td className="py-3 px-3">
-                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
-                                <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                                All Clear
-                              </span>
-                            </td>
-
-                            {/* Action Button */}
-                            <td className="py-3 px-3 text-right">
-                              <Link
-                                href={`/projects/${p.id}`}
-                                className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[11px] font-medium text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 hover:text-white transition-colors"
-                              >
-                                <span>Open Board</span>
-                                <ArrowUpRight className="h-3 w-3" />
-                              </Link>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+            {/* Left: Active Projects Stacked List (lg:col-span-8) */}
+            <div className="lg:col-span-8 h-[480px]">
+              <StackedList projects={projects} isLoading={isLoading} className="h-full" />
             </div>
 
             {/* Right: Framer Motion Donut Chart (lg:col-span-4) */}
-            <div className="lg:col-span-4 rounded-2xl border border-zinc-800/80 bg-[#0d0f14]/90 p-5 shadow-xl flex flex-col justify-between">
+            <div className="lg:col-span-4 h-[480px] rounded-2xl border border-zinc-800/80 bg-[#0d0f14]/90 p-5 shadow-xl flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between pb-3 border-b border-zinc-800/60">
                   <h2 className="text-base font-bold text-white tracking-tight">DAG Readiness</h2>
@@ -816,28 +664,6 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* ─────────────────────────────────────────────────────────
-              ROW 3: STACKED LIST (Active Teammate & Member Directory)
-             ───────────────────────────────────────────────────────── */}
-          <div className="rounded-2xl border border-zinc-800/80 bg-[#0d0f14]/90 p-5 shadow-xl">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-800/60 mb-4">
-              <div>
-                <h2 className="text-base font-bold text-white tracking-tight">
-                  Team Directory & Active Collaborators
-                </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Multi-disciplinary engineers active on current deliverables
-                </p>
-              </div>
-              <span className="text-xs text-zinc-500 font-medium">
-                Governed by ABAC Role Hierarchy
-              </span>
-            </div>
-            <div className="h-[360px] w-full max-w-xl mx-auto">
-              <StackedList className="h-full" />
             </div>
           </div>
         </main>
