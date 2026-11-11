@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: 'NodeWave Deliverables Management System',
   description:
     'Operational backbone for managing multi-disciplinary project deliverables with RBAC/ABAC, DAG dependencies, and optimistic locking.',
+  icons: {
+    icon: '/project-3d-icon.png',
+  },
 };
 
 export default function RootLayout({

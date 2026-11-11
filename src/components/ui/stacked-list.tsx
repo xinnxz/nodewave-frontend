@@ -9,12 +9,12 @@ import {
   Cancel01Icon,
   CheckmarkCircle02Icon,
   Folder01Icon,
-  Layers01Icon,
   Search01Icon,
   Sorting01Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { AnimatePresence, motion } from 'motion/react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
@@ -25,33 +25,11 @@ const sweepSpring = {
   mass: 0.5,
 };
 
-// Gradient accent colors for project avatars matching modern dark SaaS palette
-const PROJECT_THEMES = [
-  { bg: 'from-blue-600/25 to-indigo-600/15', border: 'border-blue-500/30', text: 'text-blue-400' },
-  {
-    bg: 'from-emerald-600/25 to-teal-600/15',
-    border: 'border-emerald-500/30',
-    text: 'text-emerald-400',
-  },
-  {
-    bg: 'from-purple-600/25 to-pink-600/15',
-    border: 'border-purple-500/30',
-    text: 'text-purple-400',
-  },
-  {
-    bg: 'from-amber-600/25 to-orange-600/15',
-    border: 'border-amber-500/30',
-    text: 'text-amber-400',
-  },
-];
-
 interface ProjectItemProps {
   project: Project;
-  index: number;
 }
 
-const ProjectItem = ({ project, index }: ProjectItemProps) => {
-  const theme = PROJECT_THEMES[index % PROJECT_THEMES.length];
+const ProjectItem = ({ project }: ProjectItemProps) => {
   const pct = Number.parseInt(project.metrics?.progress || '0', 10) || 0;
   const isDone = pct === 100;
 
@@ -64,17 +42,16 @@ const ProjectItem = ({ project, index }: ProjectItemProps) => {
       transition={sweepSpring}
       className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 group p-3 rounded-xl border border-zinc-800/60 bg-zinc-900/30 hover:bg-zinc-800/40 hover:border-zinc-700/80 transition-all duration-200"
     >
-      {/* Left: Project Branding & Name */}
+      {/* Left: Project Branding & Name with 3D Briefcase Asset */}
       <div className="flex items-center gap-3 min-w-0">
-        <div
-          className={cn(
-            'w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shrink-0 border font-bold text-sm shadow-sm group-hover:scale-105 transition-transform',
-            theme.bg,
-            theme.border,
-            theme.text,
-          )}
-        >
-          {project.name.charAt(0).toUpperCase()}
+        <div className="relative w-10 h-10 shrink-0 flex items-center justify-center group-hover:scale-105 transition-transform">
+          <Image
+            src="/project-3d-icon.png"
+            alt={project.name}
+            width={40}
+            height={40}
+            className="w-full h-full object-contain filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.08)]"
+          />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -290,8 +267,8 @@ export function StackedList({ projects = [], isLoading = false, className }: Sta
                 variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
                 className="space-y-2.5"
               >
-                {filteredProjects.map((project, idx) => (
-                  <ProjectItem key={project.id} project={project} index={idx} />
+                {filteredProjects.map((project) => (
+                  <ProjectItem key={project.id} project={project} />
                 ))}
               </motion.div>
             )}
@@ -326,8 +303,14 @@ export function StackedList({ projects = [], isLoading = false, className }: Sta
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-indigo-400 group-hover/bar:scale-105 transition-transform">
-                <HugeiconsIcon icon={Layers01Icon} size={16} strokeWidth={2} />
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center p-1 group-hover/bar:scale-105 transition-transform shrink-0">
+                <Image
+                  src="/project-3d-icon.png"
+                  alt="Projects Directory"
+                  width={24}
+                  height={24}
+                  className="w-full h-full object-contain filter drop-shadow"
+                />
               </div>
               <motion.div layout="position">
                 <h4 className="text-xs font-semibold text-white tracking-tight leading-none">
@@ -405,8 +388,8 @@ export function StackedList({ projects = [], isLoading = false, className }: Sta
                 }}
                 className="space-y-2"
               >
-                {filteredProjects.map((p, idx) => (
-                  <ProjectItem key={`dir-${p.id}`} project={p} index={idx} />
+                {filteredProjects.map((p) => (
+                  <ProjectItem key={`dir-${p.id}`} project={p} />
                 ))}
               </motion.div>
             </div>
