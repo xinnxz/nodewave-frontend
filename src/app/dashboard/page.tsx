@@ -1,9 +1,16 @@
 'use client';
 
 import { CreateProjectModal } from '@/components/create-project-modal';
-import { DeliverablesBarChart } from '@/components/deliverables-bar-chart';
 import { Sidebar } from '@/components/sidebar';
 import { StandupSummaryModal } from '@/components/standup-summary-modal';
+import {
+  AnimatedCard,
+  CardBody,
+  CardDescription,
+  CardTitle,
+  CardVisual,
+  Visual3,
+} from '@/components/ui/animated-card-chart';
 import { HighlightCard } from '@/components/ui/card-5';
 import { DonutChart } from '@/components/ui/donut-chart';
 import { StackedList } from '@/components/ui/stacked-list';
@@ -244,9 +251,33 @@ export default function DashboardPage() {
               />
             </div>
 
-            {/* Right: Smooth Animated Deliverables Bar Chart (lg:col-span-8) */}
+            {/* Right: 21st.dev AnimatedCard with Visual3 bar chart (lg:col-span-8) */}
             <div className="lg:col-span-8">
-              <DeliverablesBarChart className="h-full" />
+              <AnimatedCard className="h-full">
+                <CardVisual className="h-[280px]">
+                  <Visual3
+                    mainColor="#6366f1"
+                    secondaryColor="#38bdf8"
+                    badge1="+14.8% velocity"
+                    badge2="Sprint 42 · Live"
+                    hoverTitle="Deliverables by Department"
+                    hoverDescription="UI/UX · Frontend · Backend — velocity across recent sprints"
+                  />
+                </CardVisual>
+                <CardBody>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Deliverables by Department</CardTitle>
+                      <CardDescription className="mt-0.5">
+                        Multi-disciplinary task allocation and velocity across recent sprints
+                      </CardDescription>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5">
+                      +14.8% velocity
+                    </span>
+                  </div>
+                </CardBody>
+              </AnimatedCard>
             </div>
           </div>
 
