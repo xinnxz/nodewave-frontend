@@ -3,16 +3,54 @@
 import { api, extractApiError } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import type { User } from '@/types';
+import { Activity, Eye, EyeOff, Info, Lock, Mail, Shield, Users } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 const SEEDED_PERSONAS = [
-  { label: 'PM: Andi Pratama', email: 'pm@nodewave.id', role: 'PRODUCT' },
-  { label: 'UI/UX: Sari Dewi', email: 'uiux@nodewave.id', role: 'UIUX' },
-  { label: 'Frontend: Budi Santoso', email: 'frontend@nodewave.id', role: 'FRONTEND' },
-  { label: 'Backend: Cahya Wijaya', email: 'backend@nodewave.id', role: 'BACKEND' },
-  { label: 'Client: PT Maju Jaya', email: 'client@guest.com', role: 'CLIENT' },
+  {
+    initials: 'AP',
+    name: 'Andi Pratama',
+    role: 'Product Manager',
+    dept: 'PRODUCT',
+    email: 'pm@nodewave.id',
+    avatarBg: 'bg-indigo-600/20 text-indigo-400 border-indigo-500/30',
+  },
+  {
+    initials: 'SR',
+    name: 'Siti Rahma',
+    role: 'UI/UX Designer',
+    dept: 'UIUX',
+    email: 'uiux@nodewave.id',
+    avatarBg: 'bg-purple-600/20 text-purple-400 border-purple-500/30',
+  },
+  {
+    initials: 'BS',
+    name: 'Budi Santoso',
+    role: 'Frontend Engineer',
+    dept: 'FRONTEND',
+    email: 'frontend@nodewave.id',
+    avatarBg: 'bg-emerald-600/20 text-emerald-400 border-emerald-500/30',
+  },
+  {
+    initials: 'EW',
+    name: 'Eko Wijaya',
+    role: 'Backend Engineer',
+    dept: 'BACKEND',
+    email: 'backend@nodewave.id',
+    avatarBg: 'bg-amber-600/20 text-amber-400 border-amber-500/30',
+  },
+  {
+    initials: 'MJ',
+    name: 'PT Maju Jaya',
+    role: 'Client Guest',
+    dept: 'CLIENT',
+    email: 'client@guest.com',
+    avatarBg: 'bg-yellow-600/20 text-yellow-400 border-yellow-500/30',
+    fullWidth: true,
+  },
 ];
 
 export default function LoginPage() {
@@ -20,15 +58,13 @@ export default function LoginPage() {
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isLogin, setIsLogin] = useState(true);
-
-  // Form states
   const [email, setEmail] = useState('pm@nodewave.id');
   const [password, setPassword] = useState('Password123!');
-  const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
+  // WebGL Interactive Dot Matrix Canvas Background
   useEffect(() => {
     let active = true;
     let renderer: any;
@@ -42,7 +78,7 @@ export default function LoginPage() {
       if (!canvasRef.current || !active) return;
       const canvas = canvasRef.current;
       renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
-      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(window.innerWidth, window.innerHeight);
 
       scene = new THREE.Scene();
@@ -51,7 +87,7 @@ export default function LoginPage() {
       const uniforms = {
         u_time: { value: 0 },
         u_resolution: { value: new THREE.Vector2(window.innerWidth * 2, window.innerHeight * 2) },
-        u_opacities: { value: [0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1.0] },
+        u_opacities: { value: [0.15, 0.2, 0.25, 0.35, 0.45, 0.55, 0.7, 0.8, 0.9, 1.0] },
         u_colors: {
           value: [
             new THREE.Vector3(1, 1, 1),
@@ -62,8 +98,8 @@ export default function LoginPage() {
             new THREE.Vector3(1, 1, 1),
           ],
         },
-        u_total_size: { value: 20.0 },
-        u_dot_size: { value: 6.0 },
+        u_total_size: { value: 24.0 },
+        u_dot_size: { value: 4.5 },
         u_reverse: { value: 0 },
       };
 
@@ -88,7 +124,6 @@ export default function LoginPage() {
           uniform float u_total_size;
           uniform float u_dot_size;
           uniform vec2 u_resolution;
-          uniform int u_reverse;
 
           out vec4 fragColor;
 
@@ -106,7 +141,7 @@ export default function LoginPage() {
 
               vec2 st2 = vec2(int(st.x / u_total_size), int(st.y / u_total_size));
 
-              float frequency = 5.0;
+              float frequency = 4.0;
               float show_offset = random(st2);
               float rand = random(st2 * floor((u_time / frequency) + show_offset + frequency));
               opacity *= u_opacities[int(rand * 10.0)];
@@ -115,17 +150,14 @@ export default function LoginPage() {
 
               vec3 color = u_colors[int(show_offset * 6.0)];
 
-              float animation_speed_factor = 3.0;
+              float animation_speed_factor = 2.2;
               vec2 center_grid = u_resolution / 2.0 / u_total_size;
               float dist_from_center = distance(center_grid, st2);
 
               float timing_offset_intro = dist_from_center * 0.01 + (random(st2) * 0.15);
+              opacity *= step(timing_offset_intro, u_time * animation_speed_factor);
 
-              float current_timing_offset = timing_offset_intro;
-              opacity *= step(current_timing_offset, u_time * animation_speed_factor);
-              opacity *= clamp((1.0 - step(current_timing_offset + 0.1, u_time * animation_speed_factor)) * 1.25, 1.0, 1.25);
-
-              fragColor = vec4(color, opacity);
+              fragColor = vec4(color, opacity * 0.75);
               fragColor.rgb *= fragColor.a;
           }
         `,
@@ -151,6 +183,7 @@ export default function LoginPage() {
       animate();
 
       const handleResize = () => {
+        if (!renderer || !active) return;
         renderer.setSize(window.innerWidth, window.innerHeight);
         uniforms.u_resolution.value.set(window.innerWidth * 2, window.innerHeight * 2);
       };
@@ -161,7 +194,6 @@ export default function LoginPage() {
       };
     };
 
-    // Dynamically load Three.js via script tag to avoid bundler import errors
     if ((window as any).THREE) {
       const cleanUp = initThree((window as any).THREE);
       return () => {
@@ -211,256 +243,143 @@ export default function LoginPage() {
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setServerError(null);
-    try {
-      const res = await api.post<{
-        success: boolean;
-        data: { user: User; token: string };
-      }>('/auth/register', {
-        name,
-        email,
-        password,
-        role: 'INTERNAL_MEMBER',
-        department: 'FRONTEND',
-      });
-      setAuth(res.data.data.user, res.data.data.token);
-      router.push('/dashboard');
-    } catch (err) {
-      setServerError(extractApiError(err).message);
-    } finally {
-      setIsLoading(false);
-    }
+    handleLogin(email, password);
   };
-
-  /* ─── shared styles matching exact 21st.dev template ─── */
-  const personaBtn: React.CSSProperties = {
-    width: '100%',
-    padding: '0.6rem 0.8rem',
-    borderRadius: 6,
-    border: '1px solid #2a2a2a',
-    background: 'rgba(25, 25, 25, 0.6)',
-    color: '#fff',
-    fontWeight: 500,
-    fontSize: '0.825rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '0.4rem',
-    transition: 'all 0.15s ease',
-  };
-
-  const input: React.CSSProperties = {
-    width: '100%',
-    padding: '0.65rem 0.85rem',
-    borderRadius: 6,
-    border: '1px solid #333',
-    background: '#000',
-    color: '#fff',
-    fontSize: '0.875rem',
-    outline: 'none',
-  };
-
-  const Logo = (
-    <div
-      style={{
-        background: '#111',
-        width: 44,
-        height: 44,
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontWeight: 700,
-        fontSize: '1.15rem',
-        marginBottom: '0.75rem',
-        border: '1px solid #333',
-        letterSpacing: '0.05em',
-      }}
-    >
-      NW
-    </div>
-  );
-
-  const Footer = (
-    <div
-      style={{
-        marginTop: '0.85rem',
-        fontSize: '0.75rem',
-        color: '#666',
-        lineHeight: 1.5,
-        textAlign: 'center',
-      }}
-    >
-      NodeWave Deliverables Management System
-      <br />
-      RBAC + ABAC · DAG Dependencies · Concurrency Control
-    </div>
-  );
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-        background: '#000',
-        color: '#fff',
-        fontFamily: "'Inter', -apple-system, sans-serif",
-        padding: '1.5rem 1rem',
-      }}
-    >
-      {/* WebGL Dot canvas */}
-      <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, zIndex: 0 }} />
+    <div className="relative h-screen w-full overflow-hidden bg-[#07080a] text-zinc-100 flex flex-col items-center justify-center p-3 sm:p-4 font-sans selection:bg-zinc-800">
+      {/* WebGL Dot Matrix Canvas Background */}
+      <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
 
-      {/* Vignette */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 1,
-          background:
-            'radial-gradient(circle at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.98) 100%)',
-          pointerEvents: 'none',
-        }}
-      />
+      {/* Subtle Radial Vignette Mask */}
+      <div className="absolute inset-0 z-1 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.96)_100%)]" />
 
-      {/* Modal card */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          background: '#121212',
-          borderRadius: 12,
-          padding: '2rem',
-          width: '100%',
-          maxWidth: 400,
-          boxShadow: '0 10px 40px rgba(0,0,0,0.8)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          border: '1px solid #222',
-        }}
-      >
-        {isLogin ? (
-          <div
-            style={{
-              width: '100%',
-              maxWidth: 360,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-            }}
-          >
-            {Logo}
-            <h1
-              style={{
-                fontSize: '1.35rem',
-                fontWeight: 600,
-                marginBottom: '0.25rem',
-                letterSpacing: '-0.025em',
-              }}
-            >
-              Sign in to Account
-            </h1>
-            <p
-              style={{
-                fontSize: '0.85rem',
-                color: '#888',
-                marginBottom: '0.85rem',
-                lineHeight: 1.5,
-              }}
-            >
-              Sign in to your NodeWave Account.
-            </p>
+      {/* Top Brand Header with Official NodeWave Logo */}
+      <div className="relative z-10 mb-2.5 text-center">
+        <div className="flex items-center justify-center gap-2">
+          <div className="relative h-6 w-6 shrink-0">
+            <Image
+              src="/nodewave-logo.png"
+              alt="NodeWave Logo"
+              width={24}
+              height={24}
+              className="h-6 w-6 object-contain"
+              priority
+            />
+          </div>
+          <span className="text-lg font-bold tracking-tight text-white">NodeWave</span>
+        </div>
+        <p className="text-[11px] text-zinc-400 font-medium">Deliverables Management System</p>
+      </div>
 
-            {serverError && (
-              <div
-                style={{
-                  width: '100%',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: 6,
-                  border: '1px solid rgba(244,63,94,0.3)',
-                  background: 'rgba(244,63,94,0.1)',
-                  color: '#fda4af',
-                  fontSize: '0.8rem',
-                  marginBottom: '0.75rem',
-                  textAlign: 'left',
-                }}
-              >
-                {serverError}
-              </div>
-            )}
+      {/* Main Glass/Matte Login Card (Strict Compact Viewport Fit - No Scroll) */}
+      <div className="relative z-10 w-full max-w-[480px] rounded-2xl border border-zinc-800/80 bg-[#0d0f14]/92 backdrop-blur-xl px-6 py-5 sm:px-7 sm:py-5 shadow-2xl shadow-black/90">
+        {/* Secure Workspace Pill */}
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700/60 bg-zinc-800/40 px-2 py-0.5 text-[10px] font-medium tracking-wider text-zinc-300">
+          <Shield className="h-3 w-3 text-zinc-400" />
+          <span>SECURE WORKSPACE</span>
+        </div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleLogin(email, password);
-              }}
-              style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}
-            >
+        {/* Heading */}
+        <div className="mt-2.5">
+          <h1 className="text-xl font-bold tracking-tight text-white">Welcome back</h1>
+          <p className="mt-0.5 text-xs text-zinc-400">
+            Sign in to access your projects and deliverables.
+          </p>
+        </div>
+
+        {/* Error Alert */}
+        {serverError && (
+          <div className="mt-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-2 text-xs text-rose-300">
+            {serverError}
+          </div>
+        )}
+
+        {/* Form Inputs */}
+        <form onSubmit={handleSubmit} className="mt-3.5 space-y-2.5">
+          <div>
+            <label htmlFor="email" className="block text-[11px] font-medium text-zinc-300">
+              Email address
+            </label>
+            <div className="relative mt-1">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
               <input
-                style={input}
+                id="email"
                 type="email"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@work-email.com"
-                required
+                placeholder="name@company.com"
+                className="w-full rounded-lg border border-zinc-800 bg-[#090b0e] pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-500 transition-colors focus:border-zinc-500 focus:outline-none"
               />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between">
+              <label htmlFor="password" className="block text-[11px] font-medium text-zinc-300">
+                Password
+              </label>
+              <button
+                type="button"
+                onClick={() => setPassword('Password123!')}
+                className="text-[10px] text-zinc-400 hover:text-zinc-200 transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
+            <div className="relative mt-1">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
               <input
-                style={input}
-                type="password"
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                required
+                placeholder="Enter your password"
+                className="w-full rounded-lg border border-zinc-800 bg-[#090b0e] pl-9 pr-9 py-2 text-xs text-white placeholder-zinc-500 transition-colors focus:border-zinc-500 focus:outline-none"
               />
               <button
-                type="submit"
-                disabled={isLoading}
-                style={{
-                  width: '100%',
-                  padding: '0.65rem',
-                  borderRadius: 6,
-                  border: 'none',
-                  background: '#ededed',
-                  color: '#000',
-                  fontWeight: 500,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  opacity: isLoading ? 0.6 : 1,
-                }}
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
               >
-                {isLoading ? 'Signing In...' : 'Continue with Email'}
+                {showPassword ? (
+                  <EyeOff className="h-3.5 w-3.5" />
+                ) : (
+                  <Eye className="h-3.5 w-3.5" />
+                )}
               </button>
-            </form>
-
-            <div
-              style={{ height: 1, background: '#222', width: '100%', margin: '1rem 0 0.85rem' }}
-            />
-
-            <div style={{ width: '100%', textAlign: 'left', marginBottom: '0.5rem' }}>
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  color: '#777',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                1-Click Seeded Personas (Evaluator)
-              </span>
             </div>
+          </div>
 
-            {SEEDED_PERSONAS.map((persona) => (
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg bg-white py-2 px-3 text-xs font-semibold text-black transition-transform hover:bg-zinc-100 active:scale-[0.98] disabled:opacity-50"
+          >
+            <span>{isLoading ? 'Signing In...' : 'Sign In'}</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </form>
+
+        {/* Divider */}
+        <div className="relative my-3 text-center">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-zinc-800/80" />
+          </div>
+          <span className="relative bg-[#0d0f14] px-2.5 text-[9px] font-semibold tracking-wider text-zinc-500 uppercase">
+            OR CONTINUE WITH A SEEDED DEMO PERSONA
+          </span>
+        </div>
+
+        {/* Seeded Persona Grid (2 Columns + 1 Full Width) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {SEEDED_PERSONAS.map((persona) => {
+            const isFullWidth = persona.fullWidth;
+            return (
               <button
                 key={persona.email}
                 type="button"
@@ -470,186 +389,53 @@ export default function LoginPage() {
                   setPassword('Password123!');
                   handleLogin(persona.email, 'Password123!');
                 }}
-                style={personaBtn}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#444';
-                  e.currentTarget.style.background = 'rgba(40,40,40,0.8)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#2a2a2a';
-                  e.currentTarget.style.background = 'rgba(25,25,25,0.6)';
-                }}
+                className={`group flex items-center justify-between rounded-lg border border-zinc-800/80 bg-[#0a0c10] p-2 text-left transition-all hover:border-zinc-700 hover:bg-zinc-800/30 active:scale-[0.99] ${
+                  isFullWidth ? 'sm:col-span-2' : ''
+                }`}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div className="flex items-center gap-2 min-w-0">
                   <div
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: '50%',
-                      background:
-                        persona.role === 'PRODUCT'
-                          ? '#10b981'
-                          : persona.role === 'CLIENT'
-                            ? '#06b6d4'
-                            : '#6366f1',
-                    }}
-                  />
-                  <span>{persona.label}</span>
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-[11px] font-bold ${persona.avatarBg}`}
+                  >
+                    {persona.initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-[11px] font-semibold text-zinc-200 group-hover:text-white">
+                      {persona.name}
+                    </p>
+                    <p className="truncate text-[9.5px] text-zinc-500">{persona.role}</p>
+                  </div>
                 </div>
-                <span style={{ fontSize: '0.7rem', color: '#888', fontFamily: 'monospace' }}>
-                  →
+
+                <span className="rounded border border-zinc-800 bg-zinc-900/60 px-1.5 py-0.5 text-[8.5px] font-semibold tracking-wider text-zinc-400 group-hover:border-zinc-700 group-hover:text-zinc-300">
+                  {persona.dept}
                 </span>
               </button>
-            ))}
+            );
+          })}
+        </div>
 
-            <div style={{ marginTop: '1.25rem', fontSize: '0.875rem', color: '#888' }}>
-              Don't have an account?{' '}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLogin(false);
-                  setServerError(null);
-                }}
-                style={{
-                  color: '#fff',
-                  fontWeight: 500,
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  fontSize: 'inherit',
-                }}
-              >
-                Sign Up
-              </button>
-            </div>
-            {Footer}
-          </div>
-        ) : (
-          <div
-            style={{
-              width: '100%',
-              maxWidth: 360,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-            }}
-          >
-            {Logo}
-            <h1
-              style={{
-                fontSize: '1.35rem',
-                fontWeight: 600,
-                marginBottom: '0.25rem',
-                letterSpacing: '-0.025em',
-              }}
-            >
-              Sign up for Account
-            </h1>
-            <p
-              style={{
-                fontSize: '0.85rem',
-                color: '#888',
-                marginBottom: '0.85rem',
-                lineHeight: 1.5,
-              }}
-            >
-              Create a new account to get started.
-            </p>
+        {/* Demo Accounts Credentials Note */}
+        <div className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-[10px] text-zinc-500">
+          <Info className="h-3 w-3 shrink-0" />
+          <span>Demo accounts use seeded credentials (password: Password123!).</span>
+        </div>
+      </div>
 
-            {serverError && (
-              <div
-                style={{
-                  width: '100%',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: 6,
-                  border: '1px solid rgba(244,63,94,0.3)',
-                  background: 'rgba(244,63,94,0.1)',
-                  color: '#fda4af',
-                  fontSize: '0.8rem',
-                  marginBottom: '0.75rem',
-                  textAlign: 'left',
-                }}
-              >
-                {serverError}
-              </div>
-            )}
-
-            <form
-              onSubmit={handleRegister}
-              style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}
-            >
-              <input
-                style={input}
-                type="text"
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <input
-                style={input}
-                type="email"
-                placeholder="name@work-email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <input
-                style={input}
-                type="password"
-                placeholder="Password (min. 8 characters)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="submit"
-                disabled={isLoading}
-                style={{
-                  width: '100%',
-                  padding: '0.65rem',
-                  borderRadius: 6,
-                  border: 'none',
-                  background: '#ededed',
-                  color: '#000',
-                  fontWeight: 500,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  opacity: isLoading ? 0.6 : 1,
-                }}
-              >
-                {isLoading ? 'Creating Account...' : 'Sign Up with Email'}
-              </button>
-            </form>
-
-            <div style={{ marginTop: '1.25rem', fontSize: '0.875rem', color: '#888' }}>
-              Already have an account?{' '}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLogin(true);
-                  setServerError(null);
-                }}
-                style={{
-                  color: '#fff',
-                  fontWeight: 500,
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  fontSize: 'inherit',
-                }}
-              >
-                Sign In
-              </button>
-            </div>
-            {Footer}
-          </div>
-        )}
+      {/* Footer Below Card */}
+      <div className="relative z-10 mt-3 space-y-0.5 text-center text-[11px] text-zinc-500">
+        <div className="flex items-center justify-center gap-2 text-zinc-400">
+          <span className="flex items-center gap-1">
+            <Users className="h-3 w-3" />
+            Built for collaborative teams
+          </span>
+          <span>·</span>
+          <span className="flex items-center gap-1">
+            <Activity className="h-3 w-3" />
+            NodeWave Workspace
+          </span>
+        </div>
+        <p className="text-[10px] text-zinc-600">© 2026 NodeWave Indonesia. All rights reserved.</p>
       </div>
     </div>
   );
