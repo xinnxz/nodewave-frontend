@@ -19,8 +19,6 @@ import {
   Calendar,
   ChevronDown,
   Columns3,
-  FolderGit2,
-  History,
   LayoutGrid,
   LogOut,
   Plus,
@@ -292,14 +290,6 @@ export default function DashboardPage() {
               <span>Overview</span>
             </Link>
 
-            <a
-              href="#projects-table"
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-200 transition-colors"
-            >
-              <FolderGit2 className="h-4 w-4 text-zinc-500" />
-              <span>Projects Matrix</span>
-            </a>
-
             {projects.length > 0 && (
               <Link
                 href={`/projects/${projects[0].id}`}
@@ -314,16 +304,6 @@ export default function DashboardPage() {
                 </span>
               </Link>
             )}
-
-            <div className="pt-2 mt-2 border-t border-zinc-800/60">
-              <span className="px-3 text-[10px] font-semibold tracking-wider text-zinc-500 uppercase">
-                Governance & Audit
-              </span>
-              <div className="mt-1.5 flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-200 cursor-pointer transition-colors">
-                <History className="h-4 w-4 text-zinc-500" />
-                <span>Audit Trail (ABAC)</span>
-              </div>
-            </div>
           </nav>
         </div>
 
