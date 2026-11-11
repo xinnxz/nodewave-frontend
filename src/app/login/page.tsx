@@ -81,6 +81,7 @@ export default function LoginPage() {
 
       const uniforms = {
         u_time: { value: 0 },
+        u_mouse: { value: new THREE.Vector2(-5000, -5000) },
         u_resolution: { value: new THREE.Vector2(window.innerWidth * 2, window.innerHeight * 2) },
         u_opacities: { value: [0.12, 0.18, 0.24, 0.3, 0.36, 0.44, 0.52, 0.6, 0.68, 0.75] },
         u_colors: {
@@ -114,6 +115,7 @@ export default function LoginPage() {
           in vec2 fragCoord;
 
           uniform float u_time;
+          uniform vec2 u_mouse;
           uniform float u_opacities[10];
           uniform vec3 u_colors[6];
           uniform float u_total_size;
@@ -141,8 +143,17 @@ export default function LoginPage() {
               float show_offset = random(st2);
               float rand = random(st2 * floor((u_time / frequency) + show_offset + frequency));
               opacity *= u_opacities[int(rand * 10.0)];
-              opacity *= 1.0 - step(u_dot_size / u_total_size, fract(st.x / u_total_size));
-              opacity *= 1.0 - step(u_dot_size / u_total_size, fract(st.y / u_total_size));
+
+              // ─── Interactive Mouse Proximity Effect ───
+              float mouse_dist = distance(fragCoord.xy, u_mouse);
+              float mouse_radius = 360.0; // ~180px screen radius
+              float mouse_influence = smoothstep(mouse_radius, 0.0, mouse_dist);
+
+              // Expand dot radius slightly near cursor for fluid gravitational lens effect
+              float dynamic_dot_size = u_dot_size + (mouse_influence * 2.5);
+
+              opacity *= 1.0 - step(dynamic_dot_size / u_total_size, fract(st.x / u_total_size));
+              opacity *= 1.0 - step(dynamic_dot_size / u_total_size, fract(st.y / u_total_size));
 
               vec3 color = u_colors[int(show_offset * 6.0)];
 
@@ -155,6 +166,13 @@ export default function LoginPage() {
               float current_timing_offset = timing_offset_intro;
               opacity *= step(current_timing_offset, u_time * animation_speed_factor);
               opacity *= clamp((1.0 - step(current_timing_offset + 0.1, u_time * animation_speed_factor)) * 1.25, 1.0, 1.25);
+
+              // Elevate brightness and transition to luminous crystal white near cursor
+              opacity += mouse_influence * 0.55 * step(0.001, opacity);
+              opacity = clamp(opacity, 0.0, 1.0);
+
+              vec3 radiant_white = vec3(0.98, 1.0, 1.0);
+              color = mix(color, radiant_white, mouse_influence * 0.85);
 
               fragColor = vec4(color, opacity);
           }
@@ -172,13 +190,33 @@ export default function LoginPage() {
       scene.add(mesh);
 
       const startTime = performance.now();
+      const currentMouse = new THREE.Vector2(-5000, -5000);
+      const targetMouse = new THREE.Vector2(-5000, -5000);
+
       const animate = () => {
         if (!active) return;
         animationId = requestAnimationFrame(animate);
         uniforms.u_time.value = (performance.now() - startTime) / 1000.0;
+
+        // Smooth fluid lerp interpolation for 60fps organic mouse tracking
+        currentMouse.x += (targetMouse.x - currentMouse.x) * 0.15;
+        currentMouse.y += (targetMouse.y - currentMouse.y) * 0.15;
+        uniforms.u_mouse.value.copy(currentMouse);
+
         renderer.render(scene, camera);
       };
       animate();
+
+      const handleMouseMove = (e: MouseEvent) => {
+        targetMouse.set(e.clientX * 2.0, e.clientY * 2.0);
+      };
+
+      const handleMouseLeave = () => {
+        targetMouse.set(-5000, -5000);
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseleave', handleMouseLeave);
 
       const handleResize = () => {
         if (!renderer || !active) return;
@@ -188,6 +226,8 @@ export default function LoginPage() {
       window.addEventListener('resize', handleResize);
 
       return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseleave', handleMouseLeave);
         window.removeEventListener('resize', handleResize);
       };
     };
