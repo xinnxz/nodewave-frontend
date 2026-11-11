@@ -78,7 +78,7 @@ const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            fill="transparent"
+            fill="none"
             stroke="#27272a"
             strokeWidth={strokeWidth}
           />
@@ -104,7 +104,7 @@ const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
                   cx={size / 2}
                   cy={size / 2}
                   r={radius}
-                  fill="transparent"
+                  fill="none"
                   stroke={segment.color}
                   strokeWidth={strokeWidth}
                   strokeDasharray={strokeDasharray}
@@ -128,6 +128,7 @@ const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
                     highlightOnHover && 'cursor-pointer',
                   )}
                   style={{
+                    pointerEvents: 'stroke',
                     filter: isActive
                       ? `drop-shadow(0px 0px 8px ${segment.color}) brightness(1.2)`
                       : 'none',
@@ -135,6 +136,7 @@ const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
                     transition: 'filter 0.2s ease-out, transform 0.2s ease-out',
                   }}
                   onMouseEnter={() => setHoveredSegment(segment)}
+                  onMouseLeave={() => setHoveredSegment(null)}
                 />
               );
             })}
@@ -144,11 +146,12 @@ const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
         {/* Center Content */}
         {centerContent && (
           <div
-            className="absolute flex flex-col items-center justify-center pointer-events-none"
+            className="absolute flex flex-col items-center justify-center rounded-full pointer-events-auto select-none"
             style={{
-              width: size - strokeWidth * 2.5,
-              height: size - strokeWidth * 2.5,
+              width: size - strokeWidth * 2,
+              height: size - strokeWidth * 2,
             }}
+            onMouseEnter={() => setHoveredSegment(null)}
           >
             {centerContent}
           </div>
