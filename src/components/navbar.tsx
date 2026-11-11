@@ -28,7 +28,8 @@ export function Navbar() {
     pathname === '/login' ||
     pathname === '/register' ||
     pathname === '/dashboard' ||
-    pathname.startsWith('/dashboard')
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/projects')
   ) {
     return null;
   }
