@@ -16,6 +16,7 @@ export interface DonutChartProps extends React.HTMLAttributes<HTMLDivElement> {
   totalValue?: number;
   size?: number;
   strokeWidth?: number;
+  baseRingColor?: string;
   animationDuration?: number;
   animationDelayPerSegment?: number;
   highlightOnHover?: boolean;
@@ -30,6 +31,7 @@ const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
       totalValue: propTotalValue,
       size = 200,
       strokeWidth = 20,
+      baseRingColor = '#f1f5f9',
       animationDuration = 1,
       animationDelayPerSegment = 0.05,
       highlightOnHover = true,
@@ -79,7 +81,7 @@ const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#27272a"
+            stroke={baseRingColor}
             strokeWidth={strokeWidth}
           />
 

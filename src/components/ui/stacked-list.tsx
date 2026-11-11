@@ -40,7 +40,7 @@ const ProjectItem = ({ project }: ProjectItemProps) => {
         visible: { opacity: 1, x: 0, y: 0 },
       }}
       transition={sweepSpring}
-      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 group p-3 rounded-xl border border-zinc-800/60 bg-zinc-900/30 hover:bg-zinc-800/40 hover:border-zinc-700/80 transition-all duration-200"
+      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 group p-3 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50/80 hover:border-slate-300 transition-all duration-200 shadow-xs"
     >
       {/* Left: Project Branding & Name with 3D Briefcase Asset */}
       <div className="flex items-center gap-3 min-w-0">
@@ -50,7 +50,7 @@ const ProjectItem = ({ project }: ProjectItemProps) => {
             alt={project.name}
             width={40}
             height={40}
-            className="w-full h-full object-contain filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.08)]"
+            className="w-full h-full object-contain filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
           />
         </div>
 
@@ -58,45 +58,45 @@ const ProjectItem = ({ project }: ProjectItemProps) => {
           <div className="flex items-center gap-2">
             <Link
               href={`/projects/${project.id}`}
-              className="text-xs font-semibold text-white group-hover:text-cyan-300 transition-colors truncate block"
+              className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate block"
             >
               {project.name}
             </Link>
-            <span className="shrink-0 rounded bg-zinc-800/80 border border-zinc-700/50 px-1.5 py-0.5 text-[9px] font-medium text-zinc-300">
+            <span className="shrink-0 rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[9px] font-semibold text-slate-700">
               {project.clientName}
             </span>
           </div>
-          <p className="text-[10.5px] text-zinc-400 truncate mt-0.5 max-w-[200px] sm:max-w-xs">
+          <p className="text-[10.5px] text-slate-500 truncate mt-0.5 max-w-[200px] sm:max-w-xs">
             {project.description || 'Deliverables Management Workspace'}
           </p>
         </div>
       </div>
 
       {/* Center & Right: Team avatars, Progress, DAG Health, Action */}
-      <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-zinc-800/40">
+      <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-slate-100">
         {/* Team Avatars */}
         <div className="flex -space-x-1.5 overflow-hidden">
           <span
             title="Product Manager"
-            className="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d0f14] bg-indigo-600/30 text-indigo-300 text-[8px] font-bold text-center leading-5"
+            className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-indigo-50 text-indigo-700 border border-indigo-200 text-[8px] font-bold text-center leading-5"
           >
             PM
           </span>
           <span
             title="UI/UX Designer"
-            className="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d0f14] bg-purple-600/30 text-purple-300 text-[8px] font-bold text-center leading-5"
+            className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-purple-50 text-purple-700 border border-purple-200 text-[8px] font-bold text-center leading-5"
           >
             UI
           </span>
           <span
             title="Frontend Engineer"
-            className="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d0f14] bg-emerald-600/30 text-emerald-300 text-[8px] font-bold text-center leading-5"
+            className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-emerald-50 text-emerald-700 border border-emerald-200 text-[8px] font-bold text-center leading-5"
           >
             FE
           </span>
           <span
             title="Backend Engineer"
-            className="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d0f14] bg-amber-600/30 text-amber-300 text-[8px] font-bold text-center leading-5"
+            className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-amber-50 text-amber-700 border border-amber-200 text-[8px] font-bold text-center leading-5"
           >
             BE
           </span>
@@ -104,25 +104,25 @@ const ProjectItem = ({ project }: ProjectItemProps) => {
 
         {/* Deliverables Progress */}
         <div className="w-24 space-y-1">
-          <div className="flex items-center justify-between text-[9.5px] font-mono text-zinc-400">
+          <div className="flex items-center justify-between text-[9.5px] font-mono text-slate-500">
             <span>
               {project.metrics?.doneTasks || 0}/{project.metrics?.totalTasks || 0}
             </span>
-            <span className="font-semibold text-white">{pct}%</span>
+            <span className="font-bold text-slate-900">{pct}%</span>
           </div>
-          <div className="h-1.5 w-full rounded-full bg-zinc-800 overflow-hidden">
+          <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
             <div
               style={{ width: `${pct}%` }}
               className={cn(
                 'h-full rounded-full transition-all duration-500',
-                isDone ? 'bg-emerald-400' : 'bg-gradient-to-r from-indigo-500 to-cyan-400',
+                isDone ? 'bg-emerald-500' : 'bg-gradient-to-r from-indigo-500 to-cyan-500',
               )}
             />
           </div>
         </div>
 
         {/* DAG Health Badge */}
-        <div className="hidden md:flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9.5px] font-medium text-emerald-400">
+        <div className="hidden md:flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[9.5px] font-semibold text-emerald-700">
           <HugeiconsIcon icon={CheckmarkCircle02Icon} size={11} strokeWidth={2} />
           <span>Clear</span>
         </div>
@@ -130,7 +130,7 @@ const ProjectItem = ({ project }: ProjectItemProps) => {
         {/* Action Button */}
         <Link
           href={`/projects/${project.id}`}
-          className="inline-flex items-center gap-1 rounded-lg border border-zinc-700/80 bg-zinc-800/90 hover:bg-white hover:text-black hover:border-white px-2.5 py-1 text-[11px] font-semibold text-zinc-200 transition-all active:scale-95 shadow-sm"
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-900 bg-slate-900 hover:bg-indigo-600 hover:border-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white transition-all active:scale-95 shadow-xs"
         >
           <span>Open</span>
           <HugeiconsIcon icon={ArrowUpRight01Icon} size={12} strokeWidth={2.2} />
@@ -209,25 +209,25 @@ export function StackedList({ projects = [], isLoading = false, className }: Sta
 
   return (
     <div className={cn('relative w-full h-full flex flex-col', className)}>
-      <div className="relative w-full h-full rounded-2xl border border-zinc-800/80 bg-[#0d0f14]/90 flex flex-col overflow-hidden shadow-xl">
+      <div className="relative w-full h-full rounded-2xl border border-slate-200/90 bg-white flex flex-col overflow-hidden shadow-sm">
         <div className="flex flex-col h-full">
           {/* Header Bar */}
-          <div className="p-4 pb-3 border-b border-zinc-800/60">
+          <div className="p-4 pb-3 border-b border-slate-100">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
                   Active Projects
-                  <span className="text-[10px] bg-zinc-800/90 border border-zinc-700/60 px-2 py-0.5 rounded-full text-zinc-300 leading-none font-mono">
+                  <span className="text-[10px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full text-slate-700 leading-none font-mono font-bold">
                     {displayProjects.length}
                   </span>
                 </h2>
-                <span className="hidden sm:inline-block text-[10px] text-zinc-500 font-medium">
+                <span className="hidden sm:inline-block text-[10px] text-slate-500 font-medium">
                   · Governed by DAG & ABAC
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/80 px-2.5 py-1 text-[11px] text-zinc-400">
+                <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 font-medium">
                   <HugeiconsIcon icon={Sorting01Icon} size={12} strokeWidth={2} />
                   <span>Sort by: Active</span>
                 </div>
@@ -238,14 +238,14 @@ export function StackedList({ projects = [], isLoading = false, className }: Sta
             <div className="relative">
               <HugeiconsIcon
                 icon={Search01Icon}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 z-10"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10"
                 size={14}
               />
               <Input
                 placeholder="Search active projects or clients..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 pl-8 pr-3 bg-zinc-900/60 border-zinc-800 rounded-lg text-xs text-white placeholder:text-zinc-500 transition-all w-full"
+                className="h-8 pl-8 pr-3 bg-slate-50/80 border-slate-200 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 transition-all w-full focus:bg-white"
               />
             </div>
           </div>
@@ -253,11 +253,11 @@ export function StackedList({ projects = [], isLoading = false, className }: Sta
           {/* List of Projects (Scrollable) */}
           <div className="flex-1 overflow-y-auto p-4 pb-20 custom-scrollbar">
             {isLoading ? (
-              <div className="py-12 text-center text-xs text-zinc-500">
+              <div className="py-12 text-center text-xs text-slate-500">
                 Loading projects matrix...
               </div>
             ) : filteredProjects.length === 0 ? (
-              <div className="py-12 text-center text-xs text-zinc-500">
+              <div className="py-12 text-center text-xs text-slate-500">
                 No active projects found matching &ldquo;{searchQuery}&rdquo;.
               </div>
             ) : (
@@ -292,31 +292,31 @@ export function StackedList({ projects = [], isLoading = false, className }: Sta
             damping: 30,
             mass: 0.8,
           }}
-          className="absolute z-30 overflow-hidden border border-zinc-700/80 shadow-2xl flex flex-col group/bar bg-[#13161f]/98 backdrop-blur-xl"
+          className="absolute z-30 overflow-hidden border border-slate-200/90 shadow-2xl flex flex-col group/bar bg-white/98 backdrop-blur-xl"
           style={{ cursor: isExpanded ? 'default' : 'pointer' }}
           onClick={() => !isExpanded && setIsExpanded(true)}
         >
           {/* Drawer Bar Header */}
           <div
             className={`flex items-center justify-between px-3 h-[54px] shrink-0 transition-colors ${
-              isExpanded ? 'border-b border-zinc-800' : 'hover:bg-zinc-800/40'
+              isExpanded ? 'border-b border-slate-100' : 'hover:bg-slate-50'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center p-1 group-hover/bar:scale-105 transition-transform shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center p-1 group-hover/bar:scale-105 transition-transform shrink-0">
                 <Image
                   src="/project-3d-icon.png"
                   alt="Projects Directory"
                   width={24}
                   height={24}
-                  className="w-full h-full object-contain filter drop-shadow"
+                  className="w-full h-full object-contain filter drop-shadow-xs"
                 />
               </div>
               <motion.div layout="position">
-                <h4 className="text-xs font-semibold text-white tracking-tight leading-none">
+                <h4 className="text-xs font-bold text-slate-900 tracking-tight leading-none">
                   All Projects Directory
                 </h4>
-                <p className="text-[10px] text-zinc-400 mt-1">
+                <p className="text-[10px] text-slate-500 mt-1 font-medium">
                   {displayProjects.length} Governed Multi-Tenant Workspaces
                 </p>
               </motion.div>
@@ -324,9 +324,9 @@ export function StackedList({ projects = [], isLoading = false, className }: Sta
 
             <div className="flex items-center gap-2">
               {!isExpanded && (
-                <div className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
                   <span className="hidden sm:inline">Click to expand</span>
-                  <div className="w-6 h-6 rounded-md bg-zinc-800/80 flex items-center justify-center text-zinc-300">
+                  <div className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200/60">
                     <HugeiconsIcon icon={Folder01Icon} size={13} strokeWidth={2} />
                   </div>
                 </div>
@@ -335,7 +335,7 @@ export function StackedList({ projects = [], isLoading = false, className }: Sta
               {isExpanded && (
                 <button
                   type="button"
-                  className="h-7 w-7 rounded-lg text-zinc-400 hover:text-white transition-all flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 active:scale-90"
+                  className="h-7 w-7 rounded-lg text-slate-500 hover:text-slate-900 transition-all flex items-center justify-center bg-slate-100 hover:bg-slate-200 active:scale-90"
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsExpanded(false);
@@ -355,19 +355,19 @@ export function StackedList({ projects = [], isLoading = false, className }: Sta
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
-                  className="px-4 py-2 border-b border-zinc-800/60"
+                  className="px-4 py-2 border-b border-slate-100"
                 >
                   <div className="relative">
                     <HugeiconsIcon
                       icon={Search01Icon}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 z-10"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10"
                       size={13}
                     />
                     <Input
                       placeholder="Filter directory..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-8 bg-zinc-900/60 border-zinc-800 rounded-lg text-xs text-white placeholder:text-zinc-500 transition-all w-full pl-8"
+                      className="h-8 bg-slate-50 border-slate-200 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 transition-all w-full pl-8 focus:bg-white"
                     />
                   </div>
                 </motion.div>

@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <body className="min-h-screen bg-[#07080a] text-zinc-100 antialiased selection:bg-zinc-800">
+      <body className="min-h-screen bg-[#f8fafc] text-slate-900 antialiased selection:bg-indigo-500/20">
         <QueryProvider>
           <Navbar />
           <main>{children}</main>

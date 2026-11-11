@@ -33,7 +33,7 @@ export const GlowingCard = React.forwardRef<HTMLDivElement, GlowingCardProps>(
       <div
         ref={ref}
         className={cn(
-          'relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-[#0d0f14]/90 p-4 shadow-xl transition-all hover:border-zinc-700/80',
+          'relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm transition-all hover:shadow-md hover:border-slate-300',
           className,
         )}
         {...props}
@@ -43,20 +43,20 @@ export const GlowingCard = React.forwardRef<HTMLDivElement, GlowingCardProps>(
           className="glowing-dot"
           style={{
             backgroundColor: dotColor,
-            boxShadow: `0 0 10px 2px ${dotColor}, 0 0 20px 4px ${dotColor}88`,
+            boxShadow: `0 0 8px 1px ${dotColor}`,
           }}
         />
 
         {/* Ambient Ray Glow */}
-        <div className="absolute -top-12 -right-12 h-28 w-28 rounded-full bg-cyan-500/10 blur-2xl pointer-events-none" />
+        <div className="absolute -top-12 -right-12 h-28 w-28 rounded-full bg-indigo-500/5 blur-2xl pointer-events-none" />
 
         {/* Header: Title and Trend */}
         <div className="flex items-center justify-between relative z-1">
-          {title && <span className="text-[11px] font-medium text-zinc-400">{title}</span>}
+          {title && <span className="text-[11px] font-semibold text-slate-500">{title}</span>}
           {trend && (
             <span
               className={cn(
-                'inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded border',
+                'inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border',
                 trendColor,
               )}
             >
@@ -69,9 +69,9 @@ export const GlowingCard = React.forwardRef<HTMLDivElement, GlowingCardProps>(
         <div className="mt-2 flex items-baseline justify-between relative z-1">
           <div>
             {value !== undefined && (
-              <h2 className="text-2xl font-extrabold tracking-tight text-white">{value}</h2>
+              <h2 className="text-2xl font-black tracking-tight text-slate-900">{value}</h2>
             )}
-            {subtext && <p className="text-[10px] text-zinc-500 mt-0.5">{subtext}</p>}
+            {subtext && <p className="text-[10.5px] text-slate-500 mt-0.5">{subtext}</p>}
           </div>
           {sparkline && <div className="shrink-0">{sparkline}</div>}
         </div>
