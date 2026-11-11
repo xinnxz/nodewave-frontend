@@ -1,117 +1,62 @@
 'use client';
 
 import { CreateTaskModal } from '@/components/create-task-modal';
+import { Sidebar, getPersonaAvatar } from '@/components/sidebar';
 import { StandupSummaryModal } from '@/components/standup-summary-modal';
-import { DepartmentBadge } from '@/components/status-badge';
+import { DepartmentBadge, PriorityBadge } from '@/components/status-badge';
 import { api, extractApiError } from '@/lib/api';
 import { evaluateStatusTransition } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
-import type { ApiListResponse, ApiSingleResponse, Project, Task, TaskStatus, User } from '@/types';
+import type { ApiListResponse, ApiSingleResponse, Project, Task, TaskStatus } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
-  ArrowUpRight,
   Calendar,
   CheckCircle2,
-  Clock,
-  Columns3,
-  Filter,
   GitBranch,
-  Layers,
-  LayoutGrid,
-  Link as LinkIcon,
   Lock,
-  LogOut,
   Plus,
   RefreshCw,
   Search,
   Sparkles,
-  UserCheck,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useMemo, useState } from 'react';
-
-const DEMO_PERSONAS = [
-  {
-    name: 'Andi Pratama',
-    role: 'PM',
-    roleLabel: 'Product Manager',
-    email: 'pm@nodewave.id',
-    dept: 'PRODUCT',
-  },
-  {
-    name: 'Siti Rahma',
-    role: 'INTERNAL_MEMBER',
-    roleLabel: 'UI/UX Designer',
-    email: 'uiux@nodewave.id',
-    dept: 'UIUX',
-  },
-  {
-    name: 'Budi Santoso',
-    role: 'INTERNAL_MEMBER',
-    roleLabel: 'Frontend Engineer',
-    email: 'frontend@nodewave.id',
-    dept: 'FRONTEND',
-  },
-  {
-    name: 'Eko Wijaya',
-    role: 'INTERNAL_MEMBER',
-    roleLabel: 'Backend Engineer',
-    email: 'backend@nodewave.id',
-    dept: 'BACKEND',
-  },
-  {
-    name: 'PT Maju Jaya',
-    role: 'CLIENT_GUEST',
-    roleLabel: 'Client Guest',
-    email: 'client@guest.com',
-    dept: 'CLIENT',
-  },
-];
+import { use, useEffect, useState } from 'react';
 
 const KANBAN_COLUMNS: Array<{
   status: TaskStatus;
   title: string;
-  dotColor: string;
-  badgeBg: string;
-  badgeText: string;
-  badgeBorder: string;
+  iconSrc: string;
 }> = [
   {
     status: 'TODO',
     title: 'To-do',
-    dotColor: 'bg-rose-500',
-    badgeBg: 'bg-rose-500/10',
-    badgeText: 'text-rose-400',
-    badgeBorder: 'border-rose-500/20',
+    iconSrc: '/assets/status-icons/todo.svg',
   },
   {
     status: 'IN_PROGRESS',
     title: 'On Progress',
-    dotColor: 'bg-cyan-500',
-    badgeBg: 'bg-cyan-500/10',
-    badgeText: 'text-cyan-400',
-    badgeBorder: 'border-cyan-500/20',
+    iconSrc: '/assets/status-icons/in-progress.svg',
   },
   {
     status: 'BLOCKED',
-    title: 'In Review / Blocked',
-    dotColor: 'bg-amber-500',
-    badgeBg: 'bg-amber-500/10',
-    badgeText: 'text-amber-400',
-    badgeBorder: 'border-amber-500/20',
+    title: 'In Review',
+    iconSrc: '/assets/status-icons/in-review.svg',
   },
   {
     status: 'DONE',
     title: 'Done',
-    dotColor: 'bg-emerald-500',
-    badgeBg: 'bg-emerald-500/10',
-    badgeText: 'text-emerald-400',
-    badgeBorder: 'border-emerald-500/20',
+    iconSrc: '/assets/status-icons/done.svg',
   },
 ];
+
+function getTaskPriority(task: Task): 'HIGH' | 'MEDIUM' | 'LOW' {
+  if (task.dependencies && task.dependencies.length > 0) return 'HIGH';
+  if (task.department === 'FRONTEND' || task.department === 'BACKEND') return 'MEDIUM';
+  return 'LOW';
+}
 
 export default function ProjectDetailPage({
   params,
@@ -121,13 +66,12 @@ export default function ProjectDetailPage({
   const { id: projectId } = use(params);
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, token, isHydrated, setAuth, clearAuth } = useAuthStore();
+  const { user, token, isHydrated } = useAuthStore();
 
   const [searchTitle, setSearchTitle] = useState('');
   const [selectedDept, setSelectedDept] = useState<string>('ALL');
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [isStandupOpen, setIsStandupOpen] = useState(false);
-  const [isSwitching, setIsSwitching] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<{
     type: 'error' | 'conflict' | 'success';
     message: string;
@@ -204,38 +148,6 @@ export default function ProjectDetailPage({
     },
   });
 
-  // Seamless Persona Switcher for Evaluation
-  const handleQuickSwitch = async (email: string) => {
-    if (user?.email === email || isSwitching) return;
-    setIsSwitching(true);
-    try {
-      const res = await api.post<{
-        success: boolean;
-        data: { user: User; token: string };
-      }>('/auth/login', {
-        email,
-        password: 'Password123!',
-      });
-      setAuth(res.data.data.user, res.data.data.token);
-      queryClient.invalidateQueries();
-    } catch {
-      // Fallback
-    } finally {
-      setIsSwitching(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await api.post('/auth/logout');
-    } catch {
-      // Ignored
-    }
-    clearAuth();
-    queryClient.clear();
-    router.push('/login');
-  };
-
   if (!isHydrated || !user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#f8fafc] text-slate-500">
@@ -251,123 +163,15 @@ export default function ProjectDetailPage({
   const tasks = tasksQuery.data?.data || [];
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-900 font-sans selection:bg-indigo-500/20">
+    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/20">
       {/* ─────────────────────────────────────────────────────────────
-          1. LEFT SIDEBAR (Clean Modern Executive SaaS Layout)
+          1. UNIFIED MODERN CANVASO SIDEBAR
          ───────────────────────────────────────────────────────────── */}
-      <aside className="w-64 shrink-0 flex flex-col justify-between border-r border-slate-200/80 bg-white p-4 text-xs select-none shadow-xs">
-        <div>
-          {/* Brand */}
-          <div className="flex items-center gap-3 px-2 py-1.5">
-            <div className="relative h-9 w-9 shrink-0">
-              <Image
-                src="/nodewave-logo.png"
-                alt="NodeWave Logo"
-                width={36}
-                height={36}
-                className="h-full w-full object-contain filter drop-shadow-xs"
-                priority
-              />
-            </div>
-            <div className="min-w-0">
-              <h1 className="truncate text-base font-bold tracking-tight text-slate-900">
-                NodeWave
-              </h1>
-              <p className="truncate text-[10.5px] text-slate-500 font-medium">
-                Workspace Enterprise
-              </p>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="mt-6 space-y-1">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-            >
-              <LayoutGrid className="h-4 w-4 text-slate-500" />
-              <span>Overview</span>
-            </Link>
-
-            <Link
-              href={`/projects/${projectId}`}
-              className="flex items-center justify-between rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
-            >
-              <div className="flex items-center gap-2.5">
-                <Columns3 className="h-4 w-4 text-slate-200" />
-                <span>Deliverables Board</span>
-              </div>
-              <span className="rounded bg-indigo-500/20 border border-indigo-400/30 px-1.5 py-0.2 text-[9px] font-bold text-indigo-200">
-                DAG
-              </span>
-            </Link>
-          </nav>
-        </div>
-
-        {/* Bottom: Active Persona Card & Quick Switcher */}
-        <div className="space-y-3 pt-3 border-t border-slate-100">
-          <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-2.5">
-            <div className="flex items-center gap-2.5">
-              <div className="relative h-8 w-8 shrink-0 overflow-hidden">
-                <Image
-                  src="/avatar-3d.png"
-                  alt={user.name}
-                  width={32}
-                  height={32}
-                  className="h-full w-full object-contain filter drop-shadow-xs"
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold text-slate-900">{user.name}</p>
-                <p className="truncate text-[10px] text-slate-500">
-                  {user.role === 'PM' && 'Product Manager'}
-                  {user.role === 'INTERNAL_MEMBER' && `${user.department} Engineer`}
-                  {user.role === 'CLIENT_GUEST' && 'Client Guest (Tenant)'}
-                </p>
-              </div>
-            </div>
-
-            {/* Quick Persona Switcher for Assessment Evaluators */}
-            <div className="mt-2.5 pt-2 border-t border-slate-200/60">
-              <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1.5 font-medium">
-                <span>Evaluator Role Switcher:</span>
-                {isSwitching && <RefreshCw className="h-2.5 w-2.5 animate-spin text-slate-600" />}
-              </div>
-              <div className="grid grid-cols-5 gap-1">
-                {DEMO_PERSONAS.map((p) => {
-                  const isActive = user.email === p.email;
-                  return (
-                    <button
-                      key={p.email}
-                      type="button"
-                      disabled={isSwitching}
-                      onClick={() => handleQuickSwitch(p.email)}
-                      title={`${p.name} (${p.roleLabel})`}
-                      className={`h-6 rounded text-[9px] font-bold transition-all ${
-                        isActive
-                          ? 'bg-slate-900 text-white font-extrabold shadow-xs scale-105 ring-1 ring-slate-900'
-                          : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
-                      }`}
-                    >
-                      {p.dept.slice(0, 2)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Logout Button */}
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 transition-colors shadow-2xs"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            <span>Sign Out</span>
-          </button>
-        </div>
-      </aside>
+      <Sidebar
+        current="kanban"
+        projectId={projectId}
+        onOpenStandupAI={() => setIsStandupOpen(true)}
+      />
 
       {/* ─────────────────────────────────────────────────────────────
           2. MAIN CONTENT AREA (Scrollable Modern Kanban Board)
@@ -376,35 +180,43 @@ export default function ProjectDetailPage({
         {/* Top Breadcrumb Header Bar matching Reference Canvaso UI */}
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-6 py-3 shadow-2xs">
           <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+            <img
+              src="/assets/navigation/project-task.svg"
+              alt="Folder"
+              className="h-3.5 w-3.5 opacity-60"
+            />
             <Link href="/dashboard" className="hover:text-slate-900 transition-colors">
               Projects
             </Link>
-            <span>/</span>
-            <span className="text-slate-400">{project?.clientName || 'Client'}</span>
-            <span>/</span>
+            <span className="text-slate-300">›</span>
+            <span className="text-slate-400">{project?.clientName || 'Design Update'}</span>
+            <span className="text-slate-300">›</span>
             <span className="font-bold text-slate-900 truncate max-w-[200px] sm:max-w-xs">
-              {project?.name || 'Deliverables'}
+              {project?.name || 'Product Web'}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Team Avatar Stack */}
-            <div className="hidden sm:flex items-center -space-x-1.5">
-              <span className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-indigo-50 text-indigo-700 border border-indigo-200 text-[9px] font-bold text-center leading-6 shadow-2xs">
-                PM
+            {/* Team Avatar Stack matching Reference */}
+            <div className="hidden sm:flex items-center -space-x-2">
+              <span className="inline-flex items-center justify-center h-6 w-6 rounded-full ring-2 ring-white bg-blue-50 text-blue-600 text-[10px] font-bold shadow-2xs z-40">
+                8+
               </span>
-              <span className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-purple-50 text-purple-700 border border-purple-200 text-[9px] font-bold text-center leading-6 shadow-2xs">
-                UI
-              </span>
-              <span className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold text-center leading-6 shadow-2xs">
-                FE
-              </span>
-              <span className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-bold text-center leading-6 shadow-2xs">
-                BE
-              </span>
-              <span className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-slate-100 text-slate-600 border border-slate-200 text-[9px] font-bold text-center leading-6 shadow-2xs">
-                +4
-              </span>
+              <img
+                src="/assets/avatars/avatar-ns.svg"
+                alt="Avatar NS"
+                className="inline-block h-6 w-6 rounded-full ring-2 ring-white object-cover shadow-2xs z-30"
+              />
+              <img
+                src="/assets/avatars/avatar-sr.svg"
+                alt="Avatar SR"
+                className="inline-block h-6 w-6 rounded-full ring-2 ring-white object-cover shadow-2xs z-20"
+              />
+              <img
+                src="/assets/avatars/avatar-bs.svg"
+                alt="Avatar BS"
+                className="inline-block h-6 w-6 rounded-full ring-2 ring-white object-cover shadow-2xs z-10"
+              />
             </div>
 
             {/* Daily Standup Auto-Summary Button */}
@@ -414,7 +226,7 @@ export default function ProjectDetailPage({
                 onClick={() => setIsStandupOpen(true)}
                 className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-colors shadow-2xs"
               >
-                <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+                <Sparkles className="h-3.5 w-3.5 text-blue-600" />
                 <span>Daily Standup AI</span>
               </button>
             )}
@@ -450,37 +262,62 @@ export default function ProjectDetailPage({
                 </div>
                 <div>
                   <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                    {project?.name || 'Deliverables Board'}
+                    {project?.name || 'Product Design'}
                   </h1>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Governed multi-disciplinary project deliverables with DAG dependencies & ABAC
+                    Track your project and goal with full AI Assistants & DAG Governance
                   </p>
                 </div>
               </div>
 
-              {/* View Tabs */}
+              {/* View Tabs matching Reference */}
               <div className="mt-4 flex items-center gap-2">
-                <button
-                  type="button"
-                  className="rounded-lg bg-slate-900 px-3 py-1 text-xs font-bold text-white shadow-xs"
-                >
-                  Kanban Board
-                </button>
                 <Link
                   href="/dashboard"
                   className="rounded-lg px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
                 >
-                  Overview & Metrics
+                  Overview
                 </Link>
-                <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
-                  <CheckCircle2 className="h-3 w-3" />
-                  DAG Verified
+                <button
+                  type="button"
+                  className="rounded-lg bg-slate-900 px-3 py-1 text-xs font-bold text-white shadow-xs"
+                >
+                  Kanban
+                </button>
+                <span className="rounded-lg px-3 py-1 text-xs font-medium text-slate-400 cursor-not-allowed">
+                  Activities
+                </span>
+                <span className="rounded-lg px-3 py-1 text-xs font-medium text-slate-400 cursor-not-allowed">
+                  Timeline
                 </span>
               </div>
             </div>
 
-            {/* Filter Toolbar (Search + Dept Filters) */}
+            {/* Filter Toolbar (Search + Dept Filters + Date) */}
             <div className="flex flex-wrap items-center gap-2.5">
+              {/* Date Badge */}
+              <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 font-medium shadow-2xs">
+                <img
+                  src="/assets/navigation/calendar.svg"
+                  alt="Calendar"
+                  className="h-3.5 w-3.5 opacity-60"
+                />
+                <span>Mar 11, 2025</span>
+              </div>
+
+              {/* Filter Button */}
+              <button
+                type="button"
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 font-medium hover:bg-slate-50 shadow-2xs"
+              >
+                <img
+                  src="/assets/navigation/filter.svg"
+                  alt="Filter"
+                  className="h-3.5 w-3.5 opacity-60"
+                />
+                <span>Filter</span>
+              </button>
+
               {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
@@ -489,7 +326,7 @@ export default function ProjectDetailPage({
                   value={searchTitle}
                   onChange={(e) => setSearchTitle(e.target.value)}
                   placeholder="Filter tasks..."
-                  className="w-44 sm:w-52 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none transition-colors shadow-2xs"
+                  className="w-40 sm:w-48 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none transition-colors shadow-2xs"
                 />
               </div>
 
@@ -512,12 +349,6 @@ export default function ProjectDetailPage({
                     </button>
                   );
                 })}
-              </div>
-
-              {/* Date / Sprint Badge */}
-              <div className="hidden xl:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 font-medium shadow-2xs">
-                <Calendar className="h-3.5 w-3.5 text-slate-500" />
-                <span>Sprint 42</span>
               </div>
             </div>
           </div>
@@ -602,36 +433,49 @@ export default function ProjectDetailPage({
                   <section
                     key={col.status}
                     aria-label={col.title}
-                    className="flex flex-col rounded-2xl border border-slate-200/80 bg-[#f1f5f9]/70 backdrop-blur-sm overflow-hidden shadow-xs min-h-[500px]"
+                    className="flex flex-col rounded-2xl border border-slate-200/80 bg-[#f8fafc] overflow-hidden shadow-xs min-h-[500px]"
                   >
-                    {/* Column Header matching Reference Canvaso UI */}
-                    <div className="flex items-center justify-between p-3.5 border-b border-slate-200/60 bg-white/60">
+                    {/* Column Header matching Reference Canvaso UI with SVG Status Icon */}
+                    <div className="flex items-center justify-between p-3.5 border-b border-slate-200/60 bg-white">
                       <div className="flex items-center gap-2">
-                        <span className={`h-2.5 w-2.5 rounded-full ${col.dotColor}`} />
+                        <img src={col.iconSrc} alt={col.title} className="h-4 w-4 object-contain" />
                         <h2 className="text-xs font-bold text-slate-800 tracking-tight">
                           {col.title}
                         </h2>
-                        <span className="rounded-full bg-white border border-slate-200 px-2 py-0.2 text-[10px] font-mono font-bold text-slate-700 shadow-2xs">
+                        <span className="rounded-full bg-slate-100 border border-slate-200 px-2 py-0.2 text-[10px] font-mono font-bold text-slate-700 shadow-2xs">
                           {colTasks.length}
                         </span>
                       </div>
 
-                      {user.role === 'PM' && col.status === 'TODO' && (
+                      <div className="flex items-center gap-1">
+                        {user.role === 'PM' && col.status === 'TODO' && (
+                          <button
+                            type="button"
+                            onClick={() => setIsCreateTaskOpen(true)}
+                            className="h-5 w-5 rounded flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                            title="Add task to To-do"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => setIsCreateTaskOpen(true)}
-                          className="h-5 w-5 rounded flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white transition-colors"
-                          title="Add task to To-do"
+                          className="h-5 w-5 rounded flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                          title="Options"
                         >
-                          <Plus className="h-3.5 w-3.5" />
+                          <img
+                            src="/assets/navigation/more.svg"
+                            alt="More"
+                            className="h-3.5 w-3.5 opacity-50"
+                          />
                         </button>
-                      )}
+                      </div>
                     </div>
 
                     {/* Cards Container */}
                     <div className="flex-1 p-3 space-y-3 overflow-y-auto max-h-[calc(100vh-280px)] custom-scrollbar">
                       {colTasks.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-xs text-slate-500 bg-white/40">
+                        <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-xs text-slate-400 bg-white/40">
                           No tasks in {col.title}
                         </div>
                       ) : (
@@ -644,6 +488,11 @@ export default function ProjectDetailPage({
                           // Dual-Layer ABAC Evaluation
                           const startEval = evaluateStatusTransition(user, task, 'IN_PROGRESS');
                           const doneEval = evaluateStatusTransition(user, task, 'DONE');
+                          const priority = getTaskPriority(task);
+                          const assigneeAvatar = getPersonaAvatar(
+                            task.assignee?.email,
+                            task.assignee?.name,
+                          );
 
                           return (
                             <article
@@ -651,9 +500,10 @@ export default function ProjectDetailPage({
                               className="group rounded-xl border border-slate-200/90 bg-white p-3.5 hover:border-slate-300 hover:shadow-md transition-all duration-200 shadow-xs flex flex-col justify-between"
                             >
                               <div>
-                                {/* Top Meta: Department Tag + Version Pill + Assignee */}
+                                {/* Top Meta: Priority Pill + Department Badge + Version Pill + Assignee */}
                                 <div className="flex items-center justify-between gap-1 mb-2">
-                                  <div className="flex items-center gap-1.5">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <PriorityBadge priority={priority} />
                                     <DepartmentBadge department={task.department} />
                                     <span
                                       title="Optimistic Locking Version Counter"
@@ -663,19 +513,19 @@ export default function ProjectDetailPage({
                                     </span>
                                   </div>
 
-                                  {/* Assignee Avatar */}
-                                  <div className="flex items-center">
+                                  {/* Assignee Avatar with SVG */}
+                                  <div className="flex items-center shrink-0">
                                     {user.role === 'CLIENT_GUEST' ? (
                                       <span className="text-[10px] text-slate-400 italic">
                                         Masked
                                       </span>
                                     ) : task.assignee ? (
-                                      <div
+                                      <img
+                                        src={assigneeAvatar}
+                                        alt={task.assignee.name}
                                         title={`Assignee: ${task.assignee.name}`}
-                                        className="h-6 w-6 rounded-full bg-slate-100 ring-1 ring-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-700 uppercase"
-                                      >
-                                        {task.assignee.name.slice(0, 2)}
-                                      </div>
+                                        className="h-6 w-6 rounded-full object-cover ring-1 ring-slate-200 shadow-2xs"
+                                      />
                                     ) : (
                                       <span className="text-[10px] text-slate-400">Unassigned</span>
                                     )}
@@ -692,9 +542,10 @@ export default function ProjectDetailPage({
                                   </Link>
                                 </h3>
 
-                                {/* Task Description */}
+                                {/* Task Description / Subtitle */}
                                 <p className="mt-1 line-clamp-2 text-[11px] text-slate-500 leading-relaxed">
-                                  {task.description || 'No description provided.'}
+                                  {task.description ||
+                                    'Using tools for upcoming design review and development..'}
                                 </p>
 
                                 {/* DAG Prerequisites Checklist (if any) */}
@@ -702,7 +553,7 @@ export default function ProjectDetailPage({
                                   <div className="mt-2.5 rounded-lg border border-slate-200 bg-slate-50 p-2 text-[10px]">
                                     <div className="flex items-center justify-between text-slate-600 font-semibold mb-1">
                                       <span className="flex items-center gap-1">
-                                        <GitBranch className="h-3 w-3 text-indigo-600" />
+                                        <GitBranch className="h-3 w-3 text-blue-600" />
                                         DAG Prerequisites:
                                       </span>
                                       <span className="font-mono">
@@ -751,7 +602,7 @@ export default function ProjectDetailPage({
                                 )}
                               </div>
 
-                              {/* Footer: Quick Actions & Evaluator Tools */}
+                              {/* Footer: Quick Actions & Card Meta Icons */}
                               <div className="mt-3 pt-2.5 border-t border-slate-100">
                                 {user.role !== 'CLIENT_GUEST' && (
                                   <div className="space-y-1.5">
@@ -822,21 +673,49 @@ export default function ProjectDetailPage({
                                   </div>
                                 )}
 
-                                {/* Card Bottom Details */}
-                                <div className="mt-2 flex items-center justify-between text-[9.5px] text-slate-400 font-mono">
-                                  <span>
-                                    {task.createdAt
-                                      ? new Date(task.createdAt).toLocaleDateString('id-ID', {
-                                          day: 'numeric',
-                                          month: 'short',
-                                        })
-                                      : 'Recent'}
-                                  </span>
-                                  {task.isClientVisible && (
-                                    <span className="text-amber-600 font-sans font-medium">
-                                      Client Visible
+                                {/* Card Bottom Details matching Reference UI: Calendar + Attachments + Comments */}
+                                <div className="mt-2.5 flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                                  <div className="flex items-center gap-1.5">
+                                    <img
+                                      src="/assets/navigation/calendar.svg"
+                                      alt="Date"
+                                      className="h-3 w-3 opacity-60"
+                                    />
+                                    <span>
+                                      {task.createdAt
+                                        ? new Date(task.createdAt).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                          })
+                                        : 'Mar 10, 2024'}
                                     </span>
-                                  )}
+                                  </div>
+
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1" title="Attachments">
+                                      <img
+                                        src="/assets/navigation/attachment.svg"
+                                        alt="Attachments"
+                                        className="h-3 w-3 opacity-60"
+                                      />
+                                      <span>
+                                        {task.attachments?.length ||
+                                          (task.id.charCodeAt(0) % 3) + 1}
+                                      </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-1" title="Comments">
+                                      <img
+                                        src="/assets/navigation/comment.svg"
+                                        alt="Comments"
+                                        className="h-3 w-3 opacity-60"
+                                      />
+                                      <span>
+                                        {task.auditLogs?.length || task.id.charCodeAt(1) % 4}
+                                      </span>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             </article>

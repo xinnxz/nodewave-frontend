@@ -1,6 +1,7 @@
 'use client';
 
 import { CreateProjectModal } from '@/components/create-project-modal';
+import { Sidebar } from '@/components/sidebar';
 import { Badge } from '@/components/ui/badge';
 import {
   type ChartConfig,
@@ -32,44 +33,6 @@ import { useRouter } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bar, BarChart, XAxis } from 'recharts';
-
-const DEMO_PERSONAS = [
-  {
-    name: 'Andi Pratama',
-    role: 'PM',
-    roleLabel: 'Product Manager',
-    email: 'pm@nodewave.id',
-    dept: 'PRODUCT',
-  },
-  {
-    name: 'Siti Rahma',
-    role: 'INTERNAL_MEMBER',
-    roleLabel: 'UI/UX Designer',
-    email: 'uiux@nodewave.id',
-    dept: 'UIUX',
-  },
-  {
-    name: 'Budi Santoso',
-    role: 'INTERNAL_MEMBER',
-    roleLabel: 'Frontend Engineer',
-    email: 'frontend@nodewave.id',
-    dept: 'FRONTEND',
-  },
-  {
-    name: 'Eko Wijaya',
-    role: 'INTERNAL_MEMBER',
-    roleLabel: 'Backend Engineer',
-    email: 'backend@nodewave.id',
-    dept: 'BACKEND',
-  },
-  {
-    name: 'PT Maju Jaya',
-    role: 'CLIENT_GUEST',
-    roleLabel: 'Client Guest',
-    email: 'client@guest.com',
-    dept: 'CLIENT',
-  },
-];
 
 // Recharts gradient bar data mapping deliverables per department across cycles
 const DEPARTMENT_CHART_DATA = [
@@ -212,38 +175,6 @@ export default function DashboardPage() {
     ];
   }, [metrics]);
 
-  // Seamless Persona Switcher for Evaluation
-  const handleQuickSwitch = async (email: string) => {
-    if (user?.email === email || isSwitching) return;
-    setIsSwitching(true);
-    try {
-      const res = await api.post<{
-        success: boolean;
-        data: { user: User; token: string };
-      }>('/auth/login', {
-        email,
-        password: 'Password123!',
-      });
-      setAuth(res.data.data.user, res.data.data.token);
-      queryClient.invalidateQueries();
-    } catch {
-      // Fallback
-    } finally {
-      setIsSwitching(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await api.post('/auth/logout');
-    } catch {
-      // Ignored
-    }
-    clearAuth();
-    queryClient.clear();
-    router.push('/login');
-  };
-
   if (!isHydrated || !user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#f8fafc] text-slate-500">
@@ -256,125 +187,11 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-900 font-sans selection:bg-indigo-500/20">
+    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/20">
       {/* ─────────────────────────────────────────────────────────────
-          1. LEFT SIDEBAR (Ultra-Sleek Modern Clean SaaS Layout)
+          1. UNIFIED MODERN CANVASO SIDEBAR
          ───────────────────────────────────────────────────────────── */}
-      <aside className="w-64 shrink-0 flex flex-col justify-between border-r border-slate-200/80 bg-white p-4 text-xs select-none shadow-xs">
-        {/* Top: Brand & Workspace */}
-        <div>
-          <div className="flex items-center gap-3 px-2 py-1.5">
-            <div className="relative h-9 w-9 shrink-0">
-              <Image
-                src="/nodewave-logo.png"
-                alt="NodeWave Logo"
-                width={36}
-                height={36}
-                className="h-full w-full object-contain filter drop-shadow-xs"
-                priority
-              />
-            </div>
-            <div className="min-w-0">
-              <h1 className="truncate text-base font-bold tracking-tight text-slate-900">
-                NodeWave
-              </h1>
-              <p className="truncate text-[10.5px] text-slate-500 font-medium">
-                Workspace Enterprise
-              </p>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="mt-6 space-y-1">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
-            >
-              <LayoutGrid className="h-4 w-4 text-slate-200" />
-              <span>Overview</span>
-            </Link>
-
-            {projects.length > 0 && (
-              <Link
-                href={`/projects/${projects[0].id}`}
-                className="flex items-center justify-between rounded-lg px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Columns3 className="h-4 w-4 text-slate-500" />
-                  <span>Deliverables Board</span>
-                </div>
-                <span className="rounded bg-indigo-50 border border-indigo-200 px-1.5 py-0.2 text-[9px] font-bold text-indigo-700">
-                  DAG
-                </span>
-              </Link>
-            )}
-          </nav>
-        </div>
-
-        {/* Bottom: Active Persona Card & Quick Switcher */}
-        <div className="space-y-3 pt-3 border-t border-slate-100">
-          <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-2.5">
-            <div className="flex items-center gap-2.5">
-              <div className="relative h-8 w-8 shrink-0 overflow-hidden">
-                <Image
-                  src="/avatar-3d.png"
-                  alt={user.name}
-                  width={32}
-                  height={32}
-                  className="h-full w-full object-contain filter drop-shadow-xs"
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold text-slate-900">{user.name}</p>
-                <p className="truncate text-[10px] text-slate-500">
-                  {user.role === 'PM' && 'Product Manager'}
-                  {user.role === 'INTERNAL_MEMBER' && `${user.department} Engineer`}
-                  {user.role === 'CLIENT_GUEST' && 'Client Guest (Tenant)'}
-                </p>
-              </div>
-            </div>
-
-            {/* Quick Persona Switcher for Assessment Evaluators */}
-            <div className="mt-2.5 pt-2 border-t border-slate-200/60">
-              <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1.5 font-medium">
-                <span>Evaluator Role Switcher:</span>
-                {isSwitching && <RefreshCw className="h-2.5 w-2.5 animate-spin text-slate-600" />}
-              </div>
-              <div className="grid grid-cols-5 gap-1">
-                {DEMO_PERSONAS.map((p) => {
-                  const isActive = user.email === p.email;
-                  return (
-                    <button
-                      key={p.email}
-                      type="button"
-                      disabled={isSwitching}
-                      onClick={() => handleQuickSwitch(p.email)}
-                      title={`${p.name} (${p.roleLabel})`}
-                      className={`h-6 rounded text-[9px] font-bold transition-all ${
-                        isActive
-                          ? 'bg-slate-900 text-white font-extrabold shadow-xs scale-105 ring-1 ring-slate-900'
-                          : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
-                      }`}
-                    >
-                      {p.dept.slice(0, 2)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Logout Button */}
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 transition-colors shadow-2xs"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            <span>Sign Out</span>
-          </button>
-        </div>
-      </aside>
+      <Sidebar current="dashboard" projectId={projects[0]?.id} />
 
       {/* ─────────────────────────────────────────────────────────────
           2. MAIN CONTENT AREA (Clean Modern Canvas)

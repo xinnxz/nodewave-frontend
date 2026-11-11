@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     'Operational backbone for managing multi-disciplinary project deliverables with RBAC/ABAC, DAG dependencies, and optimistic locking.',
   icons: {
-    icon: '/project-3d-icon.png',
+    icon: '/nodewave-logo.png',
   },
 };
 

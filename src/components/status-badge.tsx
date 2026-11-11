@@ -1,78 +1,117 @@
 import { cn } from '@/lib/utils';
 import type { Department, Role, TaskStatus } from '@/types';
 
-const STATUS_STYLES: Record<TaskStatus, { label: string; className: string; dotClass: string }> = {
-  TODO: {
-    label: 'To Do',
-    className: 'bg-slate-100 text-slate-800 border-slate-300',
-    dotClass: 'bg-slate-500',
-  },
-  IN_PROGRESS: {
-    label: 'In Progress',
-    className: 'bg-sky-50 text-sky-900 border-sky-300',
-    dotClass: 'bg-sky-600',
-  },
-  BLOCKED: {
-    label: 'Blocked',
-    className: 'bg-rose-50 text-rose-900 border-rose-300',
-    dotClass: 'bg-rose-600',
-  },
-  DONE: {
-    label: 'Done',
-    className: 'bg-emerald-50 text-emerald-900 border-emerald-300',
-    dotClass: 'bg-emerald-600',
-  },
+export type Priority = 'HIGH' | 'MEDIUM' | 'LOW';
+
+const PRIORITY_SVGS: Record<Priority, { src: string; alt: string }> = {
+  HIGH: { src: '/assets/badges/priority-high.svg', alt: 'High Priority' },
+  MEDIUM: { src: '/assets/badges/priority-medium.svg', alt: 'Medium Priority' },
+  LOW: { src: '/assets/badges/priority-low.svg', alt: 'Low Priority' },
 };
 
-export function StatusBadge({ status }: { status: TaskStatus }) {
-  const cfg = STATUS_STYLES[status] || STATUS_STYLES.TODO;
+export function PriorityBadge({
+  priority,
+  className,
+}: {
+  priority: Priority;
+  className?: string;
+}) {
+  const p = PRIORITY_SVGS[priority] || PRIORITY_SVGS.MEDIUM;
   return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-0.5 text-xs font-semibold',
-        cfg.className,
-      )}
-    >
-      <span className={cn('h-1.5 w-1.5 rounded-full', cfg.dotClass)} />
-      {cfg.label}
-    </span>
+    <img
+      src={p.src}
+      alt={p.alt}
+      className={cn('h-5 w-auto object-contain inline-block', className)}
+    />
   );
 }
 
-const DEPT_STYLES: Record<Department, { label: string; className: string }> = {
-  PRODUCT: {
-    label: 'Product Mgmt',
-    className: 'bg-indigo-50 text-indigo-900 border-indigo-200',
+const DEPT_SVGS: Record<Department, { src: string; alt: string }> = {
+  PRODUCT: { src: '/assets/badges/department-product.svg', alt: 'Product' },
+  UIUX: { src: '/assets/badges/department-uiux.svg', alt: 'UI/UX' },
+  FRONTEND: { src: '/assets/badges/department-frontend.svg', alt: 'Frontend' },
+  BACKEND: { src: '/assets/badges/department-backend.svg', alt: 'Backend' },
+  CLIENT: { src: '/assets/badges/department-client.svg', alt: 'Client' },
+};
+
+export function DepartmentBadge({
+  department,
+  className,
+}: {
+  department: Department;
+  className?: string;
+}) {
+  const dept = DEPT_SVGS[department] || DEPT_SVGS.PRODUCT;
+  return (
+    <img
+      src={dept.src}
+      alt={dept.alt}
+      className={cn('h-5 w-auto object-contain inline-block', className)}
+    />
+  );
+}
+
+const STATUS_SVGS: Record<TaskStatus, { src: string; alt: string; label: string }> = {
+  TODO: {
+    src: '/assets/status-icons/todo.svg',
+    alt: 'To Do',
+    label: 'To-do',
   },
-  UIUX: {
-    label: 'UI/UX Design',
-    className: 'bg-amber-50 text-amber-900 border-amber-200',
+  IN_PROGRESS: {
+    src: '/assets/status-icons/in-progress.svg',
+    alt: 'In Progress',
+    label: 'On Progress',
   },
-  FRONTEND: {
-    label: 'Frontend Eng',
-    className: 'bg-blue-50 text-blue-900 border-blue-200',
+  BLOCKED: {
+    src: '/assets/status-icons/in-review.svg',
+    alt: 'In Review / Blocked',
+    label: 'In Review',
   },
-  BACKEND: {
-    label: 'Backend Eng',
-    className: 'bg-teal-50 text-teal-900 border-teal-200',
-  },
-  CLIENT: {
-    label: 'Client Guest',
-    className: 'bg-slate-100 text-slate-800 border-slate-300',
+  DONE: {
+    src: '/assets/status-icons/done.svg',
+    alt: 'Done',
+    label: 'Done',
   },
 };
 
-export function DepartmentBadge({ department }: { department: Department }) {
-  const cfg = DEPT_STYLES[department] || DEPT_STYLES.PRODUCT;
+export function StatusIcon({
+  status,
+  className,
+}: {
+  status: TaskStatus;
+  className?: string;
+}) {
+  const st = STATUS_SVGS[status] || STATUS_SVGS.TODO;
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded border px-2 py-0.5 text-xs font-medium',
-        cfg.className,
-      )}
-    >
-      {cfg.label}
-    </span>
+    <img
+      src={st.src}
+      alt={st.alt}
+      className={cn('h-4 w-4 object-contain inline-block', className)}
+    />
+  );
+}
+
+const STATUS_BADGE_SVGS: Record<TaskStatus, { src: string; alt: string }> = {
+  TODO: { src: '/assets/badges/status-todo.svg', alt: 'Status: To Do' },
+  IN_PROGRESS: { src: '/assets/badges/status-in-progress.svg', alt: 'Status: In Progress' },
+  BLOCKED: { src: '/assets/badges/status-in-review.svg', alt: 'Status: In Review' },
+  DONE: { src: '/assets/badges/status-done.svg', alt: 'Status: Done' },
+};
+
+export function StatusBadge({
+  status,
+  className,
+}: {
+  status: TaskStatus;
+  className?: string;
+}) {
+  const badge = STATUS_BADGE_SVGS[status] || STATUS_BADGE_SVGS.TODO;
+  return (
+    <img
+      src={badge.src}
+      alt={badge.alt}
+      className={cn('h-5 w-auto object-contain inline-block', className)}
+    />
   );
 }
 
@@ -84,7 +123,7 @@ const ROLE_LABELS: Record<Role, string> = {
 
 export function RoleBadge({ role }: { role: Role }) {
   return (
-    <span className="inline-flex items-center rounded bg-[#0052CC]/10 px-2.5 py-0.5 text-xs font-semibold text-[#0052CC]">
+    <span className="inline-flex items-center rounded bg-[#2563EB]/10 px-2.5 py-0.5 text-xs font-semibold text-[#2563EB]">
       {ROLE_LABELS[role] || role}
     </span>
   );

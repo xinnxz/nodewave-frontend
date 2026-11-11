@@ -74,32 +74,32 @@ const ProjectItem = ({ project }: ProjectItemProps) => {
 
       {/* Center & Right: Team avatars, Progress, DAG Health, Action */}
       <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-slate-100">
-        {/* Team Avatars */}
+        {/* Team Avatars with SVG Assets */}
         <div className="flex -space-x-1.5 overflow-hidden">
-          <span
+          <img
+            src="/assets/avatars/avatar-ns.svg"
+            alt="Product Manager"
             title="Product Manager"
-            className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-indigo-50 text-indigo-700 border border-indigo-200 text-[8px] font-bold text-center leading-5"
-          >
-            PM
-          </span>
-          <span
+            className="inline-block h-5 w-5 rounded-full ring-2 ring-white object-cover"
+          />
+          <img
+            src="/assets/avatars/avatar-sr.svg"
+            alt="UI/UX Designer"
             title="UI/UX Designer"
-            className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-purple-50 text-purple-700 border border-purple-200 text-[8px] font-bold text-center leading-5"
-          >
-            UI
-          </span>
-          <span
+            className="inline-block h-5 w-5 rounded-full ring-2 ring-white object-cover"
+          />
+          <img
+            src="/assets/avatars/avatar-bs.svg"
+            alt="Frontend Engineer"
             title="Frontend Engineer"
-            className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-emerald-50 text-emerald-700 border border-emerald-200 text-[8px] font-bold text-center leading-5"
-          >
-            FE
-          </span>
-          <span
+            className="inline-block h-5 w-5 rounded-full ring-2 ring-white object-cover"
+          />
+          <img
+            src="/assets/avatars/avatar-ew.svg"
+            alt="Backend Engineer"
             title="Backend Engineer"
-            className="inline-block h-5 w-5 rounded-full ring-2 ring-white bg-amber-50 text-amber-700 border border-amber-200 text-[8px] font-bold text-center leading-5"
-          >
-            BE
-          </span>
+            className="inline-block h-5 w-5 rounded-full ring-2 ring-white object-cover"
+          />
         </div>
 
         {/* Deliverables Progress */}

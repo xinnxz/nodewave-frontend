@@ -1,0 +1,6 @@
+:root {
+ --kanban-blue:#2563EB; --kanban-red:#EF4444; --kanban-violet:#7C3AED;
+ --kanban-green:#16A34A; --kanban-amber:#D97706; --kanban-text:#334155;
+ --kanban-muted:#64748B; --kanban-border:#E2E8F0; --kanban-surface:#FFFFFF;
+ --kanban-background:#F8FAFC;
+}
