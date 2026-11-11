@@ -1,16 +1,10 @@
 'use client';
 
 import { CreateProjectModal } from '@/components/create-project-modal';
+import { DeliverablesBarChart } from '@/components/deliverables-bar-chart';
 import { Sidebar } from '@/components/sidebar';
-import { Badge } from '@/components/ui/badge';
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/bar-chart';
+import { HighlightCard } from '@/components/ui/card-5';
 import { DonutChart } from '@/components/ui/donut-chart';
-import { GlowingCard } from '@/components/ui/glowing-card';
 import { StackedList } from '@/components/ui/stacked-list';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
@@ -18,71 +12,17 @@ import type { ApiListResponse, Project, User } from '@/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
+  CheckCircle2,
   ChevronDown,
-  Columns3,
-  LayoutGrid,
-  LogOut,
+  Layers,
   Plus,
   RefreshCw,
   Search,
-  TrendingUp,
+  Sparkles,
 } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Bar, BarChart, XAxis } from 'recharts';
-
-// Recharts gradient bar data mapping deliverables per department across cycles
-const DEPARTMENT_CHART_DATA = [
-  { sprint: 'Sprint 37', uiux: 6, frontend: 4, backend: 7 },
-  { sprint: 'Sprint 38', uiux: 8, frontend: 7, backend: 9 },
-  { sprint: 'Sprint 39', uiux: 5, frontend: 6, backend: 6 },
-  { sprint: 'Sprint 40', uiux: 9, frontend: 8, backend: 11 },
-  { sprint: 'Sprint 41', uiux: 7, frontend: 9, backend: 8 },
-  { sprint: 'Sprint 42', uiux: 4, frontend: 5, backend: 6 },
-];
-
-const chartConfig = {
-  uiux: {
-    label: 'UI/UX Design',
-    color: '#818cf8', // Indigo
-  },
-  frontend: {
-    label: 'Frontend Client',
-    color: '#34d399', // Emerald
-  },
-  backend: {
-    label: 'Backend Engine',
-    color: '#fbbf24', // Amber
-  },
-} satisfies ChartConfig;
-
-// Custom Gradient Multiple Bar SVG Renderer matching 21st.dev template specification
-const CustomGradientBar = (props: React.SVGProps<SVGRectElement> & { dataKey?: string }) => {
-  const { fill, x, y, width, height, dataKey } = props;
-
-  return (
-    <>
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        stroke="none"
-        fill={`url(#gradient-multiple-bar-pattern-${dataKey})`}
-      />
-      <rect x={x} y={y} width={width} height={2} stroke="none" fill={fill} />
-      <defs>
-        <linearGradient id={`gradient-multiple-bar-pattern-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={fill} stopOpacity={0.65} />
-          <stop offset="100%" stopColor={fill} stopOpacity={0.08} />
-        </linearGradient>
-      </defs>
-    </>
-  );
-};
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -259,152 +199,57 @@ export default function DashboardPage() {
               ROW 1: STAT CARDS & GRADIENT MULTIPLE BAR CHART
              ───────────────────────────────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Left 3 Glowing Cards with Orbiting Dot (lg:col-span-4) */}
+            {/* Left 3 Highlight Cards (21st.dev card-5) (lg:col-span-4) */}
             <div className="lg:col-span-4 flex flex-col justify-between gap-3">
               {/* Card 1: Total Deliverables */}
-              <GlowingCard
+              <HighlightCard
                 title="Total Deliverables"
-                value={metrics.totalTasks}
-                subtext="Across UI/UX, FE & BE teams"
-                trend="+18%"
-                trendColor="text-sky-700 bg-sky-50 border-sky-200"
-                dotColor="#0284c7"
-                sparkline={
-                  <svg className="w-24 h-9 overflow-visible" viewBox="0 0 100 40">
-                    <path
-                      d="M 0 32 Q 20 28, 35 18 T 70 22 T 100 8"
-                      fill="none"
-                      stroke="#0284c7"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                }
+                description="Across UI/UX, FE & BE teams"
+                metricValue={String(metrics.totalTasks)}
+                metricLabel="Deliverables in Cycle"
+                color="blue"
+                icon={<Layers className="h-4 w-4" />}
+                buttonText="Lihat"
+                onButtonClick={() => {
+                  const el = document.getElementById('projects-table');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
               />
 
-              {/* Card 2: Overall Completion Rate */}
-              <GlowingCard
-                title="Project Overall Status"
-                value={`${metrics.completionRate}%`}
-                subtext={`${metrics.doneTasks} of ${metrics.totalTasks} tasks DONE`}
-                trend="+12%"
-                trendColor="text-emerald-700 bg-emerald-50 border-emerald-200"
-                dotColor="#10b981"
-                sparkline={
-                  <svg className="w-24 h-9 overflow-visible" viewBox="0 0 100 40">
-                    <path
-                      d="M 0 28 Q 25 35, 45 15 T 75 25 T 100 6"
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                }
+              {/* Card 2: Active Workflows */}
+              <HighlightCard
+                title="Active Workflows"
+                description="In-Progress & Under Review"
+                metricValue={String(metrics.inProgressTasks)}
+                metricLabel="Active Tasks"
+                color="orange"
+                icon={<Sparkles className="h-4 w-4" />}
+                buttonText="Lihat"
+                onButtonClick={() => {
+                  const el = document.getElementById('projects-table');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
               />
 
-              {/* Card 3: Active Projects */}
-              <GlowingCard
-                title="Total Active Projects"
-                value={metrics.activeProjectsCount}
-                subtext="Multi-tenant isolated scopes"
-                trend="100% Active"
-                trendColor="text-indigo-700 bg-indigo-50 border-indigo-200"
-                dotColor="#6366f1"
-                sparkline={
-                  <svg className="w-24 h-9 overflow-visible" viewBox="0 0 100 40">
-                    <path
-                      d="M 0 35 Q 30 10, 50 25 T 80 12 T 100 4"
-                      fill="none"
-                      stroke="#6366f1"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                }
+              {/* Card 3: DAG Overall Status */}
+              <HighlightCard
+                title="DAG Overall Status"
+                description={`${metrics.doneTasks} of ${metrics.totalTasks} tasks completed`}
+                metricValue={`${metrics.completionRate}%`}
+                metricLabel="Readiness Score"
+                color="default"
+                icon={<CheckCircle2 className="h-4 w-4" />}
+                buttonText="Detail"
+                onButtonClick={() => {
+                  const el = document.getElementById('projects-table');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
               />
             </div>
 
-            {/* Right: Shadcn/Recharts Gradient Multiple Bar Chart (lg:col-span-8) */}
-            <div className="lg:col-span-8 rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm flex flex-col justify-between">
-              {/* Chart Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                      Deliverables by Department
-                    </h2>
-                    <Badge
-                      variant="outline"
-                      className="text-emerald-700 bg-emerald-50 border-emerald-200 text-[10px] font-bold"
-                    >
-                      <TrendingUp className="h-3 w-3 mr-1" />
-                      <span>+14.8% velocity</span>
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Multi-disciplinary task allocation and velocity across recent sprints
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-700 font-medium">
-                    <span>Monthly Cycles</span>
-                    <ChevronDown className="h-3 w-3 text-slate-500" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Recharts Container with CustomGradientBar */}
-              <div className="mt-4 pt-2">
-                <ChartContainer config={chartConfig} className="h-[210px] w-full">
-                  <BarChart accessibilityLayer data={DEPARTMENT_CHART_DATA}>
-                    <XAxis
-                      dataKey="sprint"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                      tickFormatter={(value) => value}
-                      stroke="#94a3b8"
-                      fontSize={11}
-                    />
-                    <ChartTooltip
-                      cursor={{ fill: 'rgba(0, 0, 0, 0.04)' }}
-                      content={<ChartTooltipContent indicator="dashed" />}
-                    />
-                    <Bar
-                      dataKey="uiux"
-                      shape={<CustomGradientBar dataKey="uiux" />}
-                      fill="var(--color-uiux)"
-                    />
-                    <Bar
-                      dataKey="frontend"
-                      shape={<CustomGradientBar dataKey="frontend" />}
-                      fill="var(--color-frontend)"
-                    />
-                    <Bar
-                      dataKey="backend"
-                      shape={<CustomGradientBar dataKey="backend" />}
-                      fill="var(--color-backend)"
-                    />
-                  </BarChart>
-                </ChartContainer>
-              </div>
-
-              {/* Department Legend */}
-              <div className="mt-3 flex items-center justify-center gap-6 text-[11px] text-slate-600 border-t border-slate-100 pt-3 font-medium">
-                <span className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-indigo-500 shadow-xs" />
-                  UI/UX Design
-                </span>
-                <span className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-xs" />
-                  Frontend Client
-                </span>
-                <span className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500 shadow-xs" />
-                  Backend Engine
-                </span>
-              </div>
+            {/* Right: Smooth Animated Deliverables Bar Chart (lg:col-span-8) */}
+            <div className="lg:col-span-8">
+              <DeliverablesBarChart className="h-full" />
             </div>
           </div>
 
