@@ -3,16 +3,16 @@
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { useQueryClient } from '@tanstack/react-query';
-import { LogOut, RefreshCw, Sparkles } from 'lucide-react';
+import { ChevronDown, LogOut, RefreshCw, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-const DEMO_PERSONAS = [
+export const DEMO_PERSONAS = [
   {
     name: 'Andi Pratama',
     role: 'PM',
+    code: 'PR',
     roleLabel: 'Product Manager',
     email: 'pm@nodewave.id',
     dept: 'PRODUCT',
@@ -21,6 +21,7 @@ const DEMO_PERSONAS = [
   {
     name: 'Siti Rahma',
     role: 'INTERNAL_MEMBER',
+    code: 'UI',
     roleLabel: 'UI/UX Designer',
     email: 'uiux@nodewave.id',
     dept: 'UIUX',
@@ -29,6 +30,7 @@ const DEMO_PERSONAS = [
   {
     name: 'Budi Santoso',
     role: 'INTERNAL_MEMBER',
+    code: 'FR',
     roleLabel: 'Frontend Engineer',
     email: 'frontend@nodewave.id',
     dept: 'FRONTEND',
@@ -37,7 +39,8 @@ const DEMO_PERSONAS = [
   {
     name: 'Eko Wijaya',
     role: 'INTERNAL_MEMBER',
-    roleLabel: 'Backend Engineer',
+    code: 'BA',
+    roleLabel: 'Backend Architect',
     email: 'backend@nodewave.id',
     dept: 'BACKEND',
     avatar: '/assets/avatars/avatar-ew.svg',
@@ -45,7 +48,8 @@ const DEMO_PERSONAS = [
   {
     name: 'PT Maju Jaya',
     role: 'CLIENT_GUEST',
-    roleLabel: 'Client Guest',
+    code: 'CL',
+    roleLabel: 'Client Guest (Tenant)',
     email: 'client@guest.com',
     dept: 'CLIENT',
     avatar: '/assets/avatars/avatar-nw.svg',
@@ -70,23 +74,43 @@ interface SidebarProps {
 }
 
 export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const { user, setAuth, clearAuth } = useAuthStore();
   const [isSwitching, setIsSwitching] = useState(false);
+  const [isPersonaMenuOpen, setIsPersonaMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleQuickSwitch = async (targetEmail: string) => {
     if (isSwitching || user?.email === targetEmail) return;
     setIsSwitching(true);
     try {
-      const res = await api.post('/auth/quick-switch', { email: targetEmail });
-      const { user: newUser, token } = res.data.data;
-      setAuth(newUser, token);
-      queryClient.clear();
-      router.refresh();
-    } catch {
-      // Ignored
+      let newUser = null;
+      let token = null;
+
+      // 1. Coba fast quick-switch endpoint
+      try {
+        const res = await api.post('/auth/quick-switch', { email: targetEmail });
+        newUser = res.data.data.user;
+        token = res.data.data.token;
+      } catch {
+        // 2. Fallback ke login standar
+        const res = await api.post('/auth/login', {
+          email: targetEmail,
+          password: 'Password123!',
+        });
+        newUser = res.data.data.user;
+        token = res.data.data.token;
+      }
+
+      if (newUser && token) {
+        setAuth(newUser, token);
+        queryClient.clear();
+        setIsPersonaMenuOpen(false);
+        // Reload halaman untuk merender ulang seluruh komponen sesuai peran baru
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error('Gagal beralih persona:', err);
     } finally {
       setIsSwitching(false);
     }
@@ -100,7 +124,7 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
     }
     clearAuth();
     queryClient.clear();
-    router.push('/login');
+    window.location.href = '/login';
   };
 
   const kanbanHref = projectId ? `/projects/${projectId}` : '/dashboard';
@@ -134,7 +158,7 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
           <button
             type="button"
             className="h-6 w-6 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
-            title="Toggle Sidebar"
+            title="Navigasi"
           >
             <img
               src="/assets/navigation/arrow-right.svg"
@@ -164,11 +188,12 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
         <div className="space-y-1">
           <p className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">MAIN</p>
 
+          {/* 1. Dashboard (Aktif) */}
           <Link
             href="/dashboard"
             className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs transition-colors ${
               current === 'dashboard'
-                ? 'bg-slate-100 font-bold text-slate-900'
+                ? 'bg-slate-100 font-bold text-slate-900 shadow-2xs'
                 : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
@@ -182,11 +207,12 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
             <span>Dashboard</span>
           </Link>
 
+          {/* 2. Project Task / Deliverables Board (Aktif) */}
           <Link
             href={kanbanHref}
             className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-colors ${
               current === 'kanban'
-                ? 'bg-slate-100 font-bold text-slate-900'
+                ? 'bg-slate-100 font-bold text-slate-900 shadow-2xs'
                 : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
@@ -205,36 +231,58 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
             </span>
           </Link>
 
-          <div className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer">
+          {/* 3. My Inbox (Belum Aktif - Tandai Soon) */}
+          <div
+            className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:bg-slate-50/50 cursor-not-allowed opacity-60"
+            title="Fitur dalam pengembangan"
+          >
             <div className="flex items-center gap-2.5">
               <img
                 src="/assets/navigation/inbox.svg"
                 alt="Inbox"
-                className="h-4 w-4 object-contain opacity-60"
+                className="h-4 w-4 object-contain opacity-40"
               />
               <span>My Inbox</span>
             </div>
-            <span className="h-4 min-w-4 px-1 rounded-full bg-slate-200 text-[9px] font-bold text-slate-700 flex items-center justify-center">
-              3
+            <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400">
+              Soon
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer">
-            <img
-              src="/assets/navigation/users.svg"
-              alt="Meeting"
-              className="h-4 w-4 object-contain opacity-60"
-            />
-            <span>Meeting</span>
+          {/* 4. Meeting (Belum Aktif - Tandai Soon) */}
+          <div
+            className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:bg-slate-50/50 cursor-not-allowed opacity-60"
+            title="Fitur dalam pengembangan"
+          >
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/assets/navigation/users.svg"
+                alt="Meeting"
+                className="h-4 w-4 object-contain opacity-40"
+              />
+              <span>Meeting</span>
+            </div>
+            <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400">
+              Soon
+            </span>
           </div>
 
-          <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer">
-            <img
-              src="/assets/navigation/calendar.svg"
-              alt="Calendar"
-              className="h-4 w-4 object-contain opacity-60"
-            />
-            <span>Calender</span>
+          {/* 5. Calender (Belum Aktif - Tandai Soon) */}
+          <div
+            className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:bg-slate-50/50 cursor-not-allowed opacity-60"
+            title="Fitur dalam pengembangan"
+          >
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/assets/navigation/calendar.svg"
+                alt="Calendar"
+                className="h-4 w-4 object-contain opacity-40"
+              />
+              <span>Calender</span>
+            </div>
+            <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400">
+              Soon
+            </span>
           </div>
         </div>
 
@@ -244,10 +292,11 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
             EXPLORE
           </p>
 
+          {/* AI Assisten (Aktif: Membuka modal Daily Standup AI) */}
           <button
             type="button"
             onClick={onOpenStandupAI}
-            className="w-full flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
+            className="w-full flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-indigo-50/60 hover:text-indigo-900 transition-colors text-left"
           >
             <div className="flex items-center gap-2.5">
               <Sparkles className="h-4 w-4 text-blue-600 shrink-0" />
@@ -258,78 +307,139 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
             </span>
           </button>
 
-          <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer">
-            <img
-              src="/assets/navigation/reports.svg"
-              alt="Reports"
-              className="h-4 w-4 object-contain opacity-60"
-            />
-            <span>Reports</span>
+          {/* Reports (Belum Aktif - Tandai Soon) */}
+          <div
+            className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:bg-slate-50/50 cursor-not-allowed opacity-60"
+            title="Fitur dalam pengembangan"
+          >
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/assets/navigation/reports.svg"
+                alt="Reports"
+                className="h-4 w-4 object-contain opacity-40"
+              />
+              <span>Reports</span>
+            </div>
+            <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400">
+              Soon
+            </span>
           </div>
 
-          <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer">
-            <img
-              src="/assets/navigation/team.svg"
-              alt="Team"
-              className="h-4 w-4 object-contain opacity-60"
-            />
-            <span>Team</span>
+          {/* Team (Belum Aktif - Tandai Soon) */}
+          <div
+            className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:bg-slate-50/50 cursor-not-allowed opacity-60"
+            title="Fitur dalam pengembangan"
+          >
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/assets/navigation/team.svg"
+                alt="Team"
+                className="h-4 w-4 object-contain opacity-40"
+              />
+              <span>Team</span>
+            </div>
+            <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400">
+              Soon
+            </span>
           </div>
 
-          <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer">
-            <img
-              src="/assets/navigation/settings.svg"
-              alt="Setting"
-              className="h-4 w-4 object-contain opacity-60"
-            />
-            <span>Setting</span>
+          {/* Setting (Belum Aktif - Tandai Soon) */}
+          <div
+            className="flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:bg-slate-50/50 cursor-not-allowed opacity-60"
+            title="Fitur dalam pengembangan"
+          >
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/assets/navigation/settings.svg"
+                alt="Setting"
+                className="h-4 w-4 object-contain opacity-40"
+              />
+              <span>Setting</span>
+            </div>
+            <span className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.2 text-[9px] font-semibold text-slate-400">
+              Soon
+            </span>
           </div>
         </div>
       </div>
 
       {/* Bottom Profile & Evaluator Tools */}
-      <div className="space-y-3 pt-3 border-t border-slate-100">
-        {/* Light Mode Indicator matching Canvaso */}
-        <div className="flex items-center justify-between px-2 py-1 text-[11px] text-slate-500 font-medium">
-          <div className="flex items-center gap-1.5">
-            <span className="text-amber-500">☀</span>
-            <span>Light Mode</span>
-          </div>
-          <div className="w-8 h-4 bg-blue-600 rounded-full relative p-0.5 flex items-center justify-end">
-            <div className="w-3 h-3 bg-white rounded-full shadow-xs" />
-          </div>
-        </div>
-
-        {/* User Profile Card */}
-        <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-2.5">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <img
-                src={activeAvatar}
-                alt={user?.name || 'User'}
-                className="h-8 w-8 rounded-full object-cover shrink-0 ring-1 ring-slate-200"
-              />
-              <div className="min-w-0">
-                <p className="truncate text-xs font-bold text-slate-900">
-                  {user?.name || 'Niko Satrio'}
-                </p>
-                <p className="truncate text-[10px] text-slate-500">
-                  {user?.role === 'PM' && 'Lead Product Design'}
-                  {user?.role === 'INTERNAL_MEMBER' && `${user.department} Engineer`}
-                  {user?.role === 'CLIENT_GUEST' && 'Client Guest'}
-                </p>
+      <div className="space-y-2.5 pt-3 border-t border-slate-100">
+        {/* User Profile Card with Clickable Dropdown Trigger */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setIsPersonaMenuOpen((prev) => !prev)}
+            className="w-full text-left rounded-xl border border-slate-200/90 bg-slate-50/70 hover:bg-slate-100/80 p-2 transition-colors focus:outline-none"
+            title="Klik untuk memilih akun persona"
+          >
+            <div className="flex items-center justify-between gap-1.5">
+              <div className="flex items-center gap-2 min-w-0">
+                <img
+                  src={activeAvatar}
+                  alt={user?.name || 'User'}
+                  className="h-8 w-8 rounded-full object-cover shrink-0 ring-1 ring-slate-200 shadow-2xs"
+                />
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-bold text-slate-900 leading-tight">
+                    {user?.name || 'Andi Pratama'}
+                  </p>
+                  <p className="truncate text-[10px] text-slate-500 font-medium">
+                    {user?.role === 'PM' && 'Product Manager'}
+                    {user?.role === 'INTERNAL_MEMBER' && `${user.department} Engineer`}
+                    {user?.role === 'CLIENT_GUEST' && 'Client Guest (Tenant)'}
+                  </p>
+                </div>
               </div>
+
+              <ChevronDown
+                className={`h-3.5 w-3.5 text-slate-400 shrink-0 transition-transform ${
+                  isPersonaMenuOpen ? 'rotate-180 text-blue-600' : ''
+                }`}
+              />
             </div>
+          </button>
 
-            <img
-              src="/assets/navigation/chevron-down.svg"
-              alt="Chevron"
-              className="h-3 w-3 object-contain opacity-50 shrink-0"
-            />
-          </div>
+          {/* Expandable Dropdown Menu for Persona Switching */}
+          {isPersonaMenuOpen && (
+            <div className="absolute left-0 bottom-full mb-1.5 z-50 w-full rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl space-y-1">
+              <p className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                Pilih Akun Evaluator:
+              </p>
+              {DEMO_PERSONAS.map((p) => {
+                const isActive = user?.email === p.email;
+                return (
+                  <button
+                    key={p.email}
+                    type="button"
+                    disabled={isSwitching}
+                    onClick={() => handleQuickSwitch(p.email)}
+                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors ${
+                      isActive
+                        ? 'bg-blue-50 text-blue-900 font-bold'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <img
+                      src={p.avatar}
+                      alt={p.name}
+                      className="h-5 w-5 rounded-full object-cover shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] leading-tight truncate">{p.name}</p>
+                      <p className="text-[9.5px] text-slate-400 font-normal truncate">
+                        {p.roleLabel}
+                      </p>
+                    </div>
+                    {isActive && <span className="h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
-          {/* Quick Evaluator Role Switcher */}
-          <div className="mt-2.5 pt-2 border-t border-slate-200/60">
+          {/* Quick Evaluator Role Switcher Buttons (PR, UI, FR, BA, CL) */}
+          <div className="mt-2 pt-2 border-t border-slate-200/60 px-0.5">
             <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1.5 font-medium">
               <span>Switch Persona:</span>
               {isSwitching && <RefreshCw className="h-2.5 w-2.5 animate-spin text-slate-600" />}
@@ -344,13 +454,13 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
                     disabled={isSwitching}
                     onClick={() => handleQuickSwitch(p.email)}
                     title={`${p.name} (${p.roleLabel})`}
-                    className={`h-6 rounded text-[9px] font-bold transition-all ${
+                    className={`h-6 rounded text-[9.5px] font-bold transition-all ${
                       isActive
                         ? 'bg-slate-900 text-white font-extrabold shadow-xs scale-105 ring-1 ring-slate-900'
-                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                     }`}
                   >
-                    {p.dept.slice(0, 2)}
+                    {p.code}
                   </button>
                 );
               })}
