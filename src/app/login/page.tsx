@@ -82,19 +82,19 @@ export default function LoginPage() {
       const uniforms = {
         u_time: { value: 0 },
         u_resolution: { value: new THREE.Vector2(window.innerWidth * 2, window.innerHeight * 2) },
-        u_opacities: { value: [0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.9, 0.95, 1.0, 1.0] },
+        u_opacities: { value: [0.12, 0.18, 0.24, 0.3, 0.36, 0.44, 0.52, 0.6, 0.68, 0.75] },
         u_colors: {
           value: [
-            new THREE.Vector3(1, 1, 1),
-            new THREE.Vector3(1, 1, 1),
-            new THREE.Vector3(1, 1, 1),
-            new THREE.Vector3(1, 1, 1),
-            new THREE.Vector3(1, 1, 1),
-            new THREE.Vector3(1, 1, 1),
+            new THREE.Vector3(0.75, 0.78, 0.82),
+            new THREE.Vector3(0.75, 0.78, 0.82),
+            new THREE.Vector3(0.75, 0.78, 0.82),
+            new THREE.Vector3(0.75, 0.78, 0.82),
+            new THREE.Vector3(0.75, 0.78, 0.82),
+            new THREE.Vector3(0.75, 0.78, 0.82),
           ],
         },
         u_total_size: { value: 20.0 },
-        u_dot_size: { value: 6.0 },
+        u_dot_size: { value: 5.0 },
         u_reverse: { value: 0 },
       };
 
@@ -251,8 +251,8 @@ export default function LoginPage() {
       {/* WebGL Dot Matrix Canvas Background */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
 
-      {/* Subtle Cinematic Vignette Mask - Lets bright white matrix dots shine through */}
-      <div className="absolute inset-0 z-1 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.35)_60%,rgba(0,0,0,0.85)_100%)]" />
+      {/* Balanced Cinematic Vignette Mask - Softens matrix dots to an elegant subtle ambient level */}
+      <div className="absolute inset-0 z-1 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.35)_0%,rgba(0,0,0,0.6)_60%,rgba(0,0,0,0.9)_100%)]" />
 
       {/* Top Brand Header with Larger Official NodeWave Logo */}
       <div className="relative z-10 mb-2 sm:mb-2.5 text-center">
