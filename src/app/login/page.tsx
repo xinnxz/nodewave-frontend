@@ -144,9 +144,9 @@ export default function LoginPage() {
               float rand = random(st2 * floor((u_time / frequency) + show_offset + frequency));
               opacity *= u_opacities[int(rand * 10.0)];
 
-              // ─── Expansive Wide-Radius & Tangible Proximity Effect ───
+              // ─── Perfectly Balanced Proximity Radius & Tangible Dot Effect ───
               float mouse_dist = distance(fragCoord.xy, u_mouse);
-              float mouse_radius = 850.0; // Wide ~425px sweeping radius across the screen
+              float mouse_radius = 640.0; // Balanced ~320px focused radius around mouse
               float norm_dist = clamp(mouse_dist / mouse_radius, 0.0, 1.0);
               // Ultra-smooth cosine ease-out falloff for wide, seamless ambient transition
               float cos_falloff = cos(norm_dist * 1.5707963);
