@@ -165,8 +165,14 @@ export default function ProjectDetailPage({
 
   if (!isHydrated || !user) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#f8fafc] text-slate-500">
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+      <div
+        suppressHydrationWarning
+        className="flex h-screen w-full items-center justify-center bg-[#f8fafc] text-slate-500"
+      >
+        <div
+          suppressHydrationWarning
+          className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm"
+        >
           <RefreshCw className="h-5 w-5 animate-spin text-slate-600" />
           <span className="text-sm font-medium">Memuat Deliverables Board...</span>
         </div>
@@ -178,7 +184,10 @@ export default function ProjectDetailPage({
   const tasks = tasksQuery.data?.data || [];
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/20">
+    <div
+      suppressHydrationWarning
+      className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/20"
+    >
       {/* ─────────────────────────────────────────────────────────────
           1. UNIFIED MODERN SIDEBAR
          ───────────────────────────────────────────────────────────── */}

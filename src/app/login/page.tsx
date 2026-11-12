@@ -291,7 +291,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative h-screen max-h-screen w-full overflow-hidden bg-[#07080a] text-zinc-100 flex flex-col items-center justify-center p-3 sm:p-4 font-sans selection:bg-zinc-800">
+    // suppressHydrationWarning: browser extensions (e.g. Bitwarden) inject
+    // `bis_skin_checked` attributes into every <div>. This attribute differs
+    // between SSR and client, causing a benign hydration mismatch. The flag
+    // tells React to silently ignore attribute-only mismatches on this subtree.
+    <div
+      suppressHydrationWarning
+      className="relative h-screen max-h-screen w-full overflow-hidden bg-[#07080a] text-zinc-100 flex flex-col items-center justify-center p-3 sm:p-4 font-sans selection:bg-zinc-800"
+    >
       {/* WebGL Dot Matrix Canvas Background */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
 

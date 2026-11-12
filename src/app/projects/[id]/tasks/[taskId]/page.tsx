@@ -174,9 +174,23 @@ export default function TaskDetailPage({
       transition?: { from: string; to: string };
     }> = [];
 
-    // Map real backend audit logs
+    // Track last-seen isClientVisible state to deduplicate toggle spam
+    let lastClientVisibleValue: string | null = null;
+
+    // Map real backend audit logs (most recent first from backend)
     for (let i = 0; i < rawLogs.length; i++) {
       const log = rawLogs[i];
+
+      // --- DEDUPLICATION: collapse consecutive isClientVisible toggles ---
+      // Only keep the latest one; skip intermediate flips that cancel each other out
+      if (log.changedColumn === 'isClientVisible') {
+        if (lastClientVisibleValue === log.newValue) {
+          // Same value as last seen → redundant flip pair, skip
+          continue;
+        }
+        lastClientVisibleValue = log.newValue ?? null;
+      }
+
       const actorName = log.user?.name || 'System';
       const initials = actorName
         .split(' ')
@@ -186,12 +200,24 @@ export default function TaskDetailPage({
         .toUpperCase();
 
       const isStatusChange = log.changedColumn === 'status';
-      const actionTitle = isStatusChange ? 'Updated task status' : `Updated ${log.changedColumn}`;
-      const actionDetail = isStatusChange
-        ? undefined
-        : log.newValue
-          ? `${log.oldValue || ''} → ${log.newValue}`
-          : undefined;
+      const isVisibilityChange = log.changedColumn === 'isClientVisible';
+
+      let actionTitle: string;
+      let actionDetail: string | undefined;
+      let avatarColor = 'bg-indigo-600';
+
+      if (isStatusChange) {
+        actionTitle = 'Updated task status';
+        avatarColor = 'bg-indigo-600';
+      } else if (isVisibilityChange) {
+        const isNowVisible = log.newValue === 'true';
+        actionTitle = isNowVisible ? 'Made task visible to client' : 'Hidden task from client';
+        avatarColor = 'bg-purple-600';
+      } else {
+        actionTitle = `Updated ${log.changedColumn}`;
+        actionDetail = log.newValue ? `${log.oldValue || ''} → ${log.newValue}` : undefined;
+      }
+
       const transition =
         isStatusChange && log.oldValue && log.newValue
           ? { from: log.oldValue, to: log.newValue }
@@ -202,7 +228,7 @@ export default function TaskDetailPage({
         actor: actorName,
         actorRole: 'Workspace Member',
         initials,
-        avatarColor: 'bg-indigo-600',
+        avatarColor,
         timeAgo: formatDateTime(log.createdAt),
         actionTitle,
         actionDetail,
@@ -318,8 +344,14 @@ export default function TaskDetailPage({
 
   if (!isHydrated || !user) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#f8fafc] text-slate-500">
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+      <div
+        suppressHydrationWarning
+        className="flex h-screen w-full items-center justify-center bg-[#f8fafc] text-slate-500"
+      >
+        <div
+          suppressHydrationWarning
+          className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm"
+        >
           <RefreshCw className="h-5 w-5 animate-spin text-slate-600" />
           <span className="text-sm font-medium">Memuat detail tugas...</span>
         </div>
@@ -328,7 +360,10 @@ export default function TaskDetailPage({
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/20">
+    <div
+      suppressHydrationWarning
+      className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/20"
+    >
       {/* ─────────────────────────────────────────────────────────────
           1. UNIFIED MODERN SIDEBAR
          ───────────────────────────────────────────────────────────── */}
@@ -948,30 +983,53 @@ export default function TaskDetailPage({
                     </span>
                   </div>
 
-                  {/* Client Visible Toggle */}
+                  {/* Client Visible Toggle — only PM can toggle, others see read-only indicator */}
                   <div className="flex items-center justify-between pt-1 border-t border-slate-100">
                     <span className="text-slate-500 font-medium">Client Visible</span>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={task?.isClientVisible}
-                      onClick={() => {
-                        if (task && user.role === 'PM') {
-                          toggleVisibilityMutation.mutate(!task.isClientVisible);
+                    {user?.role === 'PM' ? (
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={task?.isClientVisible ?? false}
+                        disabled={toggleVisibilityMutation.isPending || !task}
+                        onClick={() => {
+                          if (task) {
+                            toggleVisibilityMutation.mutate(!task.isClientVisible);
+                          }
+                        }}
+                        title={
+                          task?.isClientVisible
+                            ? 'Klik untuk sembunyikan dari klien'
+                            : 'Klik untuk tampilkan ke klien'
                         }
-                      }}
-                      className={cn(
-                        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none',
-                        task?.isClientVisible ? 'bg-emerald-600' : 'bg-slate-200',
-                      )}
-                    >
+                        className={cn(
+                          'relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500',
+                          task?.isClientVisible ? 'bg-emerald-600' : 'bg-slate-200',
+                          toggleVisibilityMutation.isPending || !task
+                            ? 'cursor-not-allowed opacity-60'
+                            : 'cursor-pointer',
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            'pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out mt-0.5 ml-0.5',
+                            task?.isClientVisible ? 'translate-x-4' : 'translate-x-0',
+                          )}
+                        />
+                      </button>
+                    ) : (
+                      /* Non-PM: read-only indicator */
                       <span
                         className={cn(
-                          'pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out mt-0.5 ml-0.5',
-                          task?.isClientVisible ? 'translate-x-4' : 'translate-x-0',
+                          'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border',
+                          task?.isClientVisible
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                            : 'bg-slate-50 border-slate-200 text-slate-500',
                         )}
-                      />
-                    </button>
+                      >
+                        {task?.isClientVisible ? 'Visible' : 'Hidden'}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
