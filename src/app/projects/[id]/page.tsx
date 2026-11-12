@@ -5,7 +5,7 @@ import { Sidebar, getPersonaAvatar } from '@/components/sidebar';
 import { StandupSummaryModal } from '@/components/standup-summary-modal';
 import { DepartmentBadge, PriorityBadge } from '@/components/status-badge';
 import { api, extractApiError } from '@/lib/api';
-import { evaluateStatusTransition } from '@/lib/utils';
+import { cn, evaluateStatusTransition } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import type { ApiListResponse, ApiSingleResponse, Project, Task, TaskStatus } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -19,26 +19,56 @@ const KANBAN_COLUMNS: Array<{
   status: TaskStatus;
   title: string;
   iconSrc: string;
+  headerBar: string;
+  bgTint: string;
+  borderTint: string;
+  badgeBg: string;
+  badgeText: string;
+  badgeBorder: string;
 }> = [
   {
     status: 'TODO',
     title: 'To-do',
     iconSrc: '/assets/status-icons/todo.svg',
+    headerBar: 'bg-gradient-to-r from-amber-400 to-orange-400',
+    bgTint: 'bg-amber-50/25',
+    borderTint: 'border-amber-200/70',
+    badgeBg: 'bg-amber-50',
+    badgeText: 'text-amber-800',
+    badgeBorder: 'border-amber-200/80',
   },
   {
     status: 'IN_PROGRESS',
     title: 'On Progress',
     iconSrc: '/assets/status-icons/in-progress.svg',
+    headerBar: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+    bgTint: 'bg-blue-50/25',
+    borderTint: 'border-blue-200/70',
+    badgeBg: 'bg-blue-50',
+    badgeText: 'text-blue-800',
+    badgeBorder: 'border-blue-200/80',
   },
   {
     status: 'BLOCKED',
     title: 'In Review',
     iconSrc: '/assets/status-icons/in-review.svg',
+    headerBar: 'bg-gradient-to-r from-purple-500 to-indigo-500',
+    bgTint: 'bg-purple-50/25',
+    borderTint: 'border-purple-200/70',
+    badgeBg: 'bg-purple-50',
+    badgeText: 'text-purple-800',
+    badgeBorder: 'border-purple-200/80',
   },
   {
     status: 'DONE',
     title: 'Done',
     iconSrc: '/assets/status-icons/done.svg',
+    headerBar: 'bg-gradient-to-r from-emerald-500 to-teal-500',
+    bgTint: 'bg-emerald-50/25',
+    borderTint: 'border-emerald-200/70',
+    badgeBg: 'bg-emerald-50',
+    badgeText: 'text-emerald-800',
+    badgeBorder: 'border-emerald-200/80',
   },
 ];
 
@@ -407,16 +437,30 @@ export default function ProjectDetailPage({
                   <section
                     key={col.status}
                     aria-label={col.title}
-                    className="flex flex-col h-full rounded-xl border border-slate-200/80 bg-[#f8fafc] overflow-hidden shadow-xs"
+                    className={cn(
+                      'flex flex-col h-full rounded-2xl border overflow-hidden shadow-xs transition-all duration-200',
+                      col.bgTint,
+                      col.borderTint,
+                    )}
                   >
+                    {/* Top Colored Accent Stripe */}
+                    <div className={cn('h-1 w-full shrink-0', col.headerBar)} />
+
                     {/* Column Header */}
-                    <div className="shrink-0 flex items-center justify-between px-3.5 py-2.5 border-b border-slate-200/60 bg-white">
+                    <div className="shrink-0 flex items-center justify-between px-3.5 py-2.5 border-b border-slate-200/60 bg-white/85 backdrop-blur-xs">
                       <div className="flex items-center gap-2">
                         <img src={col.iconSrc} alt={col.title} className="h-4 w-4 object-contain" />
                         <h2 className="text-xs font-bold text-slate-800 tracking-tight">
                           {col.title}
                         </h2>
-                        <span className="rounded-full bg-slate-100 border border-slate-200 px-2 py-0.2 text-[10px] font-mono font-bold text-slate-700 shadow-2xs">
+                        <span
+                          className={cn(
+                            'rounded-full border px-2 py-0.2 text-[10px] font-mono font-bold shadow-2xs',
+                            col.badgeBg,
+                            col.badgeText,
+                            col.badgeBorder,
+                          )}
+                        >
                           {colTasks.length}
                         </span>
                       </div>
@@ -468,10 +512,22 @@ export default function ProjectDetailPage({
                             task.assignee?.name,
                           );
 
+                          const deptBorderAccent =
+                            task.department === 'UIUX'
+                              ? 'border-l-[3.5px] border-l-purple-500'
+                              : task.department === 'FRONTEND'
+                                ? 'border-l-[3.5px] border-l-emerald-500'
+                                : task.department === 'BACKEND'
+                                  ? 'border-l-[3.5px] border-l-amber-500'
+                                  : 'border-l-[3.5px] border-l-blue-500';
+
                           return (
                             <article
                               key={task.id}
-                              className="group rounded-xl border border-slate-200/90 bg-white p-3 hover:border-slate-300 hover:shadow-md transition-all duration-150 shadow-2xs flex flex-col justify-between gap-2.5"
+                              className={cn(
+                                'group rounded-xl border border-slate-200/90 bg-white p-3 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shadow-2xs flex flex-col justify-between gap-2.5',
+                                deptBorderAccent,
+                              )}
                             >
                               <div className="space-y-1.5">
                                 {/* Top Meta Row: Priority Badge + Dept Badge + Assignee */}
@@ -793,12 +849,14 @@ export default function ProjectDetailPage({
           {/* Modals */}
           <CreateTaskModal
             projectId={projectId}
+            projectName={project?.name}
             isOpen={isCreateTaskOpen}
             onClose={() => setIsCreateTaskOpen(false)}
           />
 
           <StandupSummaryModal
             projectId={projectId}
+            projectName={project?.name}
             isOpen={isStandupOpen}
             onClose={() => setIsStandupOpen(false)}
           />
