@@ -18,8 +18,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id">
-      <body className="min-h-screen bg-[#f8fafc] text-slate-900 antialiased selection:bg-indigo-500/20">
+    <html lang="id" suppressHydrationWarning>
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-[#f8fafc] text-slate-900 antialiased selection:bg-indigo-500/20"
+      >
         <QueryProvider>
           <Navbar />
           <main>{children}</main>

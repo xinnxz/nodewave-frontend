@@ -298,6 +298,49 @@ export default function TaskDetailPage({
     return formatted;
   }, [task]);
 
+  // Dynamic Prerequisite Computation for DAG visualizer
+  const prerequisitesList = useMemo(() => {
+    if (task?.dependencies && task.dependencies.length > 0) {
+      return task.dependencies.map((dep) => ({
+        id: dep.prerequisite.id,
+        title: dep.prerequisite.title,
+        code: `NW-${dep.prerequisite.id.slice(-4).toUpperCase()}`,
+        department: dep.prerequisite.department,
+        status: dep.prerequisite.status,
+        isDone: dep.prerequisite.status === 'DONE',
+      }));
+    }
+    // Fallback showcase for demo when viewing the cart task or blocked tasks
+    if (
+      task?.title?.toLowerCase().includes('cart') ||
+      task?.title?.toLowerCase().includes('slicing') ||
+      task?.status === 'BLOCKED'
+    ) {
+      return [
+        {
+          id: 'mock-prereq-1',
+          title: 'Design Shopping Cart UI',
+          code: 'NW-1001',
+          department: 'UIUX',
+          status: 'DONE',
+          isDone: true,
+        },
+        {
+          id: 'mock-prereq-2',
+          title: 'Build Payment Gateway Integration',
+          code: 'NW-1008',
+          department: 'BACKEND',
+          status: 'IN_PROGRESS',
+          isDone: false,
+        },
+      ];
+    }
+    return [];
+  }, [task]);
+
+  const uncompletedCount = prerequisitesList.filter((p) => !p.isDone).length;
+  const isPrereqBlocked = uncompletedCount > 0;
+
   // Evaluate Lock & ABAC restrictions for the current user
   const doneEvaluation = task ? evaluateStatusTransition(user, task, 'DONE') : null;
   const isDoneLocked = !doneEvaluation?.allowed;
@@ -430,8 +473,8 @@ export default function TaskDetailPage({
                   {task?.title || 'Frontend Slicing Cart & Checkout'}
                 </h1>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  Implement the shopping cart and checkout flow on the frontend based on the final
-                  UI design and integrated with the payment gateway API.
+                  {task?.description ||
+                    'Implement the shopping cart and checkout flow on the frontend based on the final UI design and integrated with the payment gateway API.'}
                 </p>
               </div>
 
@@ -508,121 +551,185 @@ export default function TaskDetailPage({
               {/* Section 2: Dependencies DAG Flowchart (Matching Design #3) */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-bold text-slate-900">Dependencies (2)</h2>
+                  <h2 className="text-sm font-bold text-slate-900">
+                    Dependencies ({prerequisitesList.length})
+                  </h2>
                   <span className="text-[11px] font-medium text-slate-500">
                     Direct Acyclic Graph (DAG)
                   </span>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm space-y-4">
-                  {/* Visual Node Flow Diagram */}
-                  <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 py-2">
-                    {/* Left: Prerequisite Cards */}
-                    <div className="flex flex-col gap-4 w-full md:w-[240px]">
-                      {/* Node 1: Completed Prereq */}
-                      <div className="rounded-xl border border-emerald-200 bg-white p-3 shadow-2xs hover:shadow-xs transition-shadow">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-start gap-2 min-w-0">
-                            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold text-slate-900 truncate">
-                                Design Shopping Cart UI
-                              </p>
-                              <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                                NW-1001 • UI/UX
-                              </p>
-                            </div>
-                          </div>
-                          <span className="rounded bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 text-[9px] font-bold text-emerald-700 shrink-0">
-                            DONE
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Node 2: In-Progress Prereq (Blocking) */}
-                      <div className="rounded-xl border border-blue-200 bg-white p-3 shadow-2xs hover:shadow-xs transition-shadow">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-start gap-2 min-w-0">
-                            <div className="h-4 w-4 rounded-full border-2 border-slate-300 shrink-0 mt-0.5" />
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold text-slate-900 truncate">
-                                Build Payment Gateway Integration
-                              </p>
-                              <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                                NW-1008 • BACKEND
-                              </p>
-                            </div>
-                          </div>
-                          <span className="rounded bg-blue-50 border border-blue-200 px-1.5 py-0.2 text-[9px] font-bold text-blue-700 shrink-0">
-                            IN PROGRESS
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Middle: SVG Curved Connecting Lines */}
-                    <div className="hidden md:flex items-center justify-center w-16 h-28">
-                      <svg
-                        width="64"
-                        height="112"
-                        viewBox="0 0 64 112"
-                        fill="none"
-                        className="overflow-visible"
-                      >
-                        {/* Upper branch */}
-                        <path
-                          d="M 0 28 C 32 28, 32 56, 64 56"
-                          stroke="#cbd5e1"
-                          strokeWidth="2"
-                          strokeDasharray="4 4"
-                        />
-                        {/* Lower branch */}
-                        <path
-                          d="M 0 84 C 32 84, 32 56, 64 56"
-                          stroke="#cbd5e1"
-                          strokeWidth="2"
-                          strokeDasharray="4 4"
-                        />
-                        {/* Node arrow head */}
-                        <circle cx="60" cy="56" r="3.5" fill="#94a3b8" />
-                      </svg>
-                    </div>
-
-                    {/* Right: Target Blocked Task Card */}
-                    <div className="w-full md:w-[260px]">
-                      <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-4 shadow-2xs">
-                        <div className="flex items-start gap-2.5">
-                          <Lock className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold text-slate-900 leading-tight">
-                              {task?.title || 'Frontend Slicing Cart & Checkout'}
-                            </p>
-                            <p className="text-[10px] text-slate-500 font-mono mt-1">
-                              NW-{task ? task.id.slice(-4).toUpperCase() : '1024'} •{' '}
-                              {task?.department || 'FRONTEND'}
-                            </p>
-                            <div className="mt-2 flex items-center justify-between">
-                              <span className="rounded bg-amber-100/80 border border-amber-200 px-2 py-0.5 text-[9.5px] font-bold text-amber-800">
-                                {task?.status || 'BLOCKED'}
-                              </span>
-                              <span className="text-[9.5px] text-amber-800 font-medium">
-                                Target Node
+                  {prerequisitesList.length > 0 ? (
+                    <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 py-2">
+                      {/* Left: Prerequisite Cards */}
+                      <div className="flex flex-col gap-4 w-full md:w-[240px]">
+                        {prerequisitesList.map((prereq) => (
+                          <div
+                            key={prereq.id}
+                            className={cn(
+                              'rounded-xl border bg-white p-3 shadow-2xs hover:shadow-xs transition-shadow',
+                              prereq.isDone ? 'border-emerald-200' : 'border-blue-200',
+                            )}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-start gap-2 min-w-0">
+                                {prereq.isDone ? (
+                                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                                ) : (
+                                  <div className="h-4 w-4 rounded-full border-2 border-slate-300 shrink-0 mt-0.5" />
+                                )}
+                                <div className="min-w-0">
+                                  <p className="text-xs font-bold text-slate-900 truncate">
+                                    {prereq.title}
+                                  </p>
+                                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                                    {prereq.code} • {prereq.department}
+                                  </p>
+                                </div>
+                              </div>
+                              <span
+                                className={cn(
+                                  'rounded px-1.5 py-0.2 text-[9px] font-bold shrink-0 border',
+                                  prereq.isDone
+                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                                    : 'bg-blue-50 border-blue-200 text-blue-700',
+                                )}
+                              >
+                                {prereq.status.replace('_', ' ')}
                               </span>
                             </div>
                           </div>
+                        ))}
+                      </div>
+
+                      {/* Middle: SVG Curved Connecting Lines (Solid Smooth Bezier Curve matching Mockup) */}
+                      <div className="hidden md:flex items-center justify-center w-16 h-28">
+                        <svg
+                          width="64"
+                          height="112"
+                          viewBox="0 0 64 112"
+                          fill="none"
+                          className="overflow-visible"
+                        >
+                          {prerequisitesList.length === 1 ? (
+                            <path d="M 0 56 L 64 56" stroke="#94a3b8" strokeWidth="1.5" />
+                          ) : (
+                            <>
+                              <path
+                                d="M 0 28 C 36 28, 28 56, 64 56"
+                                stroke="#94a3b8"
+                                strokeWidth="1.5"
+                              />
+                              <path
+                                d="M 0 84 C 36 84, 28 56, 64 56"
+                                stroke="#94a3b8"
+                                strokeWidth="1.5"
+                              />
+                            </>
+                          )}
+                        </svg>
+                      </div>
+
+                      {/* Right: Target Task Card */}
+                      <div className="w-full md:w-[260px]">
+                        <div
+                          className={cn(
+                            'rounded-xl border p-4 shadow-2xs',
+                            isPrereqBlocked
+                              ? 'border-amber-200 bg-amber-50/40'
+                              : 'border-emerald-200 bg-emerald-50/30',
+                          )}
+                        >
+                          <div className="flex items-start gap-2.5">
+                            {isPrereqBlocked ? (
+                              <Lock className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />
+                            ) : (
+                              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold text-slate-900 leading-tight">
+                                {task?.title || 'Frontend Slicing Cart & Checkout'}
+                              </p>
+                              <p className="text-[10px] text-slate-500 font-mono mt-1">
+                                NW-{task ? task.id.slice(-4).toUpperCase() : '1024'} •{' '}
+                                {task?.department || 'FRONTEND'}
+                              </p>
+                              <div className="mt-2 flex items-center justify-between">
+                                <span
+                                  className={cn(
+                                    'rounded px-2 py-0.5 text-[9.5px] font-bold border',
+                                    isPrereqBlocked
+                                      ? 'bg-amber-100/80 border-amber-200 text-amber-800'
+                                      : 'bg-emerald-100/80 border-emerald-200 text-emerald-800',
+                                  )}
+                                >
+                                  {task?.status || (isPrereqBlocked ? 'BLOCKED' : 'TODO')}
+                                </span>
+                                <span className="text-[9.5px] text-slate-600 font-medium">
+                                  Target Node
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    /* Root Deliverable in DAG (No Prerequisites) */
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-3">
+                      <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 w-full md:w-[260px]">
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                        <div>
+                          <p className="text-xs font-bold text-emerald-950">Root Deliverable</p>
+                          <p className="text-[10.5px] text-emerald-800">
+                            Independent entry task in DAG
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="hidden md:flex items-center justify-center w-16">
+                        <svg width="48" height="24" viewBox="0 0 48 24" fill="none">
+                          <path
+                            d="M 0 12 L 44 12"
+                            stroke="#10b981"
+                            strokeWidth="2"
+                            strokeDasharray="3 3"
+                          />
+                          <circle cx="44" cy="12" r="3" fill="#10b981" />
+                        </svg>
+                      </div>
+
+                      <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 w-full md:w-[260px]">
+                        <p className="text-xs font-bold text-slate-900 truncate">{task?.title}</p>
+                        <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                          NW-{task ? task.id.slice(-4).toUpperCase() : '1008'} • {task?.department}
+                        </p>
+                        <span className="mt-2 inline-block rounded bg-emerald-100/80 border border-emerald-200 px-2 py-0.5 text-[9.5px] font-bold text-emerald-800">
+                          Unblocked • Ready to Start
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Warning Callout Card */}
-                  <div className="flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900 shadow-2xs">
-                    <Lock className="h-4 w-4 text-amber-700 shrink-0" />
-                    <span className="text-[11.5px] font-medium leading-relaxed">
-                      <strong>This task is blocked.</strong> 1 of 2 prerequisite tasks are not
-                      completed yet.
-                    </span>
-                  </div>
+                  {isPrereqBlocked ? (
+                    <div className="flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900 shadow-2xs">
+                      <Lock className="h-4 w-4 text-amber-700 shrink-0" />
+                      <span className="text-[11.5px] font-medium leading-relaxed">
+                        <strong>This task is blocked.</strong> {uncompletedCount} of{' '}
+                        {prerequisitesList.length} prerequisite tasks are not completed yet.
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-xs text-emerald-900 shadow-2xs">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                      <span className="text-[11.5px] font-medium leading-relaxed">
+                        <strong>All prerequisites fulfilled.</strong> This deliverable is unblocked
+                        and ready for execution by the assigned engineer.
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
