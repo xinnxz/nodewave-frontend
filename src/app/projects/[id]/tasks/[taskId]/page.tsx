@@ -174,17 +174,6 @@ export default function TaskDetailPage({
     });
   };
 
-  if (!isHydrated || !user) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#f8fafc] text-slate-500">
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
-          <RefreshCw className="h-5 w-5 animate-spin text-slate-600" />
-          <span className="text-sm font-medium">Memuat detail tugas...</span>
-        </div>
-      </div>
-    );
-  }
-
   const task = taskQuery.data;
   const project = projectQuery.data;
 
@@ -344,6 +333,17 @@ export default function TaskDetailPage({
   // Evaluate Lock & ABAC restrictions for the current user
   const doneEvaluation = task ? evaluateStatusTransition(user, task, 'DONE') : null;
   const isDoneLocked = !doneEvaluation?.allowed;
+
+  if (!isHydrated || !user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#f8fafc] text-slate-500">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+          <RefreshCw className="h-5 w-5 animate-spin text-slate-600" />
+          <span className="text-sm font-medium">Memuat detail tugas...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-900 font-sans selection:bg-blue-500/20">
