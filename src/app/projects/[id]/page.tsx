@@ -19,56 +19,51 @@ const KANBAN_COLUMNS: Array<{
   status: TaskStatus;
   title: string;
   iconSrc: string;
-  headerBar: string;
-  bgTint: string;
-  borderTint: string;
-  badgeBg: string;
-  badgeText: string;
-  badgeBorder: string;
+  bgClass: string;
+  headerBgClass: string;
+  borderClass: string;
+  badgeClass: string;
+  dotColor: string;
 }> = [
   {
     status: 'TODO',
     title: 'To-do',
     iconSrc: '/assets/status-icons/todo.svg',
-    headerBar: 'bg-gradient-to-r from-amber-400 to-orange-400',
-    bgTint: 'bg-amber-50/25',
-    borderTint: 'border-amber-200/70',
-    badgeBg: 'bg-amber-50',
-    badgeText: 'text-amber-800',
-    badgeBorder: 'border-amber-200/80',
+    bgClass: 'bg-slate-100/55',
+    headerBgClass: 'bg-white/95 border-slate-200/70',
+    borderClass: 'border-slate-200/90',
+    badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
+    dotColor: 'bg-slate-400',
   },
   {
     status: 'IN_PROGRESS',
     title: 'On Progress',
     iconSrc: '/assets/status-icons/in-progress.svg',
-    headerBar: 'bg-gradient-to-r from-blue-500 to-cyan-500',
-    bgTint: 'bg-blue-50/25',
-    borderTint: 'border-blue-200/70',
-    badgeBg: 'bg-blue-50',
-    badgeText: 'text-blue-800',
-    badgeBorder: 'border-blue-200/80',
+    bgClass: 'bg-[#eff6ff]/60', // Soft subtle sky/blue tint
+    headerBgClass: 'bg-[#f0f7ff]/95 border-blue-100/80',
+    borderClass: 'border-blue-200/60',
+    badgeClass: 'bg-blue-100/80 text-blue-700 border-blue-200/80',
+    dotColor: 'bg-blue-500',
   },
   {
     status: 'BLOCKED',
     title: 'In Review',
     iconSrc: '/assets/status-icons/in-review.svg',
-    headerBar: 'bg-gradient-to-r from-purple-500 to-indigo-500',
-    bgTint: 'bg-purple-50/25',
-    borderTint: 'border-purple-200/70',
-    badgeBg: 'bg-purple-50',
-    badgeText: 'text-purple-800',
-    badgeBorder: 'border-purple-200/80',
+    bgClass: 'bg-[#faf5ff]/60', // Soft subtle purple/violet tint
+    headerBgClass: 'bg-[#fbf7ff]/95 border-purple-100/80',
+    borderClass: 'border-purple-200/60',
+    badgeClass: 'bg-purple-100/80 text-purple-700 border-purple-200/80',
+    dotColor: 'bg-purple-500',
   },
   {
     status: 'DONE',
     title: 'Done',
     iconSrc: '/assets/status-icons/done.svg',
-    headerBar: 'bg-gradient-to-r from-emerald-500 to-teal-500',
-    bgTint: 'bg-emerald-50/25',
-    borderTint: 'border-emerald-200/70',
-    badgeBg: 'bg-emerald-50',
-    badgeText: 'text-emerald-800',
-    badgeBorder: 'border-emerald-200/80',
+    bgClass: 'bg-[#ecfdf5]/55', // Soft subtle emerald/mint tint
+    headerBgClass: 'bg-[#f0fdf4]/95 border-emerald-100/80',
+    borderClass: 'border-emerald-200/60',
+    badgeClass: 'bg-emerald-100/80 text-emerald-700 border-emerald-200/80',
+    dotColor: 'bg-emerald-500',
   },
 ];
 
@@ -438,27 +433,32 @@ export default function ProjectDetailPage({
                     key={col.status}
                     aria-label={col.title}
                     className={cn(
-                      'flex flex-col h-full rounded-2xl border overflow-hidden shadow-xs transition-all duration-200',
-                      col.bgTint,
-                      col.borderTint,
+                      'flex flex-col h-full rounded-2xl border overflow-hidden shadow-2xs transition-colors',
+                      col.bgClass,
+                      col.borderClass,
                     )}
                   >
-                    {/* Top Colored Accent Stripe */}
-                    <div className={cn('h-1 w-full shrink-0', col.headerBar)} />
-
-                    {/* Column Header */}
-                    <div className="shrink-0 flex items-center justify-between px-3.5 py-2.5 border-b border-slate-200/60 bg-white/85 backdrop-blur-xs">
+                    {/* Column Header with distinctive subtle pill */}
+                    <div
+                      className={cn(
+                        'shrink-0 flex items-center justify-between px-3.5 py-2.5 border-b backdrop-blur-xs',
+                        col.headerBgClass,
+                      )}
+                    >
                       <div className="flex items-center gap-2">
-                        <img src={col.iconSrc} alt={col.title} className="h-4 w-4 object-contain" />
+                        <span
+                          className={cn(
+                            'h-2.5 w-2.5 rounded-full shrink-0 shadow-2xs',
+                            col.dotColor,
+                          )}
+                        />
                         <h2 className="text-xs font-bold text-slate-800 tracking-tight">
                           {col.title}
                         </h2>
                         <span
                           className={cn(
                             'rounded-full border px-2 py-0.2 text-[10px] font-mono font-bold shadow-2xs',
-                            col.badgeBg,
-                            col.badgeText,
-                            col.badgeBorder,
+                            col.badgeClass,
                           )}
                         >
                           {colTasks.length}
@@ -512,22 +512,10 @@ export default function ProjectDetailPage({
                             task.assignee?.name,
                           );
 
-                          const deptBorderAccent =
-                            task.department === 'UIUX'
-                              ? 'border-l-[3.5px] border-l-purple-500'
-                              : task.department === 'FRONTEND'
-                                ? 'border-l-[3.5px] border-l-emerald-500'
-                                : task.department === 'BACKEND'
-                                  ? 'border-l-[3.5px] border-l-amber-500'
-                                  : 'border-l-[3.5px] border-l-blue-500';
-
                           return (
                             <article
                               key={task.id}
-                              className={cn(
-                                'group rounded-xl border border-slate-200/90 bg-white p-3 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shadow-2xs flex flex-col justify-between gap-2.5',
-                                deptBorderAccent,
-                              )}
+                              className="group rounded-xl border border-slate-200/90 bg-white p-3 hover:border-slate-300 hover:shadow-md transition-all duration-150 shadow-2xs flex flex-col justify-between gap-2.5"
                             >
                               <div className="space-y-1.5">
                                 {/* Top Meta Row: Priority Badge + Dept Badge + Assignee */}
