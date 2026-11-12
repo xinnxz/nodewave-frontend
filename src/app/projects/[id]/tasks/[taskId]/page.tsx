@@ -720,13 +720,13 @@ export default function TaskDetailPage({
                 </div>
 
                 <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm">
-                  <div className="relative pl-6 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                  <div className="relative pl-7 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
                     {auditEntries.map((log) => (
-                      <div key={log.id} className="relative flex items-start gap-3.5">
+                      <div key={log.id} className="relative flex items-start pl-3">
                         {/* Timeline Node Dot / Avatar */}
                         <div
                           className={cn(
-                            'absolute -left-6 top-0.5 flex h-6 w-6 items-center justify-center rounded-full text-white text-[9px] font-extrabold shadow-xs ring-4 ring-white',
+                            'absolute -left-7 top-0.5 flex h-6 w-6 items-center justify-center rounded-full text-white text-[9px] font-extrabold shadow-xs ring-4 ring-white',
                             log.avatarColor,
                           )}
                         >
