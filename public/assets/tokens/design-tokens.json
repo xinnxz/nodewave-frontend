@@ -1,0 +1,29 @@
+{
+  "colors": {
+    "primary": "#2563EB",
+    "text": "#0F172A",
+    "muted": "#64748B",
+    "border": "#E2E8F0",
+    "surface": "#FFFFFF",
+    "background": "#F8FAFC",
+    "todo": "#64748B",
+    "inProgress": "#2563EB",
+    "blocked": "#D97706",
+    "done": "#16A34A",
+    "danger": "#DC2626"
+  },
+  "radius": {
+    "sm": "6px",
+    "md": "8px",
+    "lg": "12px"
+  },
+  "spacing": {
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "6": "24px",
+    "8": "32px"
+  },
+  "font": "Inter, Geist, ui-sans-serif, system-ui"
+}

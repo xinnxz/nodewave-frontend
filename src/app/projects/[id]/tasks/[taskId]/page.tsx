@@ -40,31 +40,13 @@ import { use, useEffect, useMemo, useState } from 'react';
 const STATUS_BUTTONS: Array<{
   status: TaskStatus;
   label: string;
-  icon: any;
+  iconSrc: string;
 }> = [
-  { status: 'TODO', label: 'TODO', icon: Clock },
-  { status: 'IN_PROGRESS', label: 'IN PROGRESS', icon: Play },
-  { status: 'BLOCKED', label: 'BLOCKED', icon: PauseCircleIcon },
-  { status: 'DONE', label: 'DONE', icon: CheckCircle2 },
+  { status: 'TODO', label: 'TODO', iconSrc: '/assets/status-icons/todo.svg' },
+  { status: 'IN_PROGRESS', label: 'IN PROGRESS', iconSrc: '/assets/status-icons/in-progress.svg' },
+  { status: 'BLOCKED', label: 'BLOCKED', iconSrc: '/assets/status-icons/blocked.svg' },
+  { status: 'DONE', label: 'DONE', iconSrc: '/assets/status-icons/done.svg' },
 ];
-
-function PauseCircleIcon(props: any) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={props.className}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="10" y1="15" x2="10" y2="9" />
-      <line x1="14" y1="15" x2="14" y2="9" />
-    </svg>
-  );
-}
 
 export default function TaskDetailPage({
   params,
@@ -575,9 +557,23 @@ export default function TaskDetailPage({
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-start gap-2 min-w-0">
                                 {prereq.isDone ? (
-                                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                                  <img
+                                    src="/assets/dependency/dependency-done.svg"
+                                    alt="Done"
+                                    className="h-4 w-4 shrink-0 mt-0.5 object-contain"
+                                  />
+                                ) : prereq.status === 'IN_PROGRESS' ? (
+                                  <img
+                                    src="/assets/dependency/dependency-progress.svg"
+                                    alt="In Progress"
+                                    className="h-4 w-4 shrink-0 mt-0.5 object-contain"
+                                  />
                                 ) : (
-                                  <div className="h-4 w-4 rounded-full border-2 border-slate-300 shrink-0 mt-0.5" />
+                                  <img
+                                    src="/assets/dependency/dependency-blocked.svg"
+                                    alt="Blocked"
+                                    className="h-4 w-4 shrink-0 mt-0.5 object-contain"
+                                  />
                                 )}
                                 <div className="min-w-0">
                                   <p className="text-xs font-bold text-slate-900 truncate">
@@ -603,32 +599,13 @@ export default function TaskDetailPage({
                         ))}
                       </div>
 
-                      {/* Middle: SVG Curved Connecting Lines (Solid Smooth Bezier Curve matching Mockup) */}
-                      <div className="hidden md:flex items-center justify-center w-16 h-28">
-                        <svg
-                          width="64"
-                          height="112"
-                          viewBox="0 0 64 112"
-                          fill="none"
-                          className="overflow-visible"
-                        >
-                          {prerequisitesList.length === 1 ? (
-                            <path d="M 0 56 L 64 56" stroke="#94a3b8" strokeWidth="1.5" />
-                          ) : (
-                            <>
-                              <path
-                                d="M 0 28 C 36 28, 28 56, 64 56"
-                                stroke="#94a3b8"
-                                strokeWidth="1.5"
-                              />
-                              <path
-                                d="M 0 84 C 36 84, 28 56, 64 56"
-                                stroke="#94a3b8"
-                                strokeWidth="1.5"
-                              />
-                            </>
-                          )}
-                        </svg>
+                      {/* Middle: Official DAG Connector Asset */}
+                      <div className="hidden md:flex items-center justify-center w-16">
+                        <img
+                          src="/assets/dependency/dag-connector.svg"
+                          alt="DAG Connector"
+                          className="w-13 h-8 object-contain opacity-85"
+                        />
                       </div>
 
                       {/* Right: Target Task Card */}
@@ -826,7 +803,8 @@ export default function TaskDetailPage({
                       ? evaluateStatusTransition(user, task, item.status)
                       : null;
                     const isAllowed = isCurrent || Boolean(evalResult?.allowed);
-                    const Icon = item.icon;
+                    const isLocked = !isAllowed && item.status === 'DONE';
+                    const iconSrc = isLocked ? '/assets/status-icons/locked.svg' : item.iconSrc;
 
                     return (
                       <button
@@ -850,7 +828,7 @@ export default function TaskDetailPage({
                               : 'border-slate-100 bg-slate-50/60 text-slate-400 cursor-not-allowed opacity-60',
                         )}
                       >
-                        <Icon className="h-4 w-4" />
+                        <img src={iconSrc} alt={item.label} className="h-4 w-4 object-contain" />
                         <span className="text-[10.5px]">{item.label}</span>
                       </button>
                     );

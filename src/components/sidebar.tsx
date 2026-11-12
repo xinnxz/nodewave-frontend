@@ -149,17 +149,6 @@ export function Sidebar({ current, projectId, onOpenStandupAI }: SidebarProps) {
               </span>
             </div>
           </Link>
-          <button
-            type="button"
-            className="h-6 w-6 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
-            title="Navigasi"
-          >
-            <img
-              src="/assets/navigation/arrow-right.svg"
-              alt="Arrow"
-              className="h-3 w-3 object-contain opacity-70"
-            />
-          </button>
         </div>
 
         {/* Search Bar */}
