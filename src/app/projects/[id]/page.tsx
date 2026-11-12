@@ -446,11 +446,10 @@ export default function ProjectDetailPage({
                       )}
                     >
                       <div className="flex items-center gap-2">
-                        <span
-                          className={cn(
-                            'h-2.5 w-2.5 rounded-full shrink-0 shadow-2xs',
-                            col.dotColor,
-                          )}
+                        <img
+                          src={col.iconSrc}
+                          alt={col.title}
+                          className="h-4 w-4 object-contain shrink-0"
                         />
                         <h2 className="text-xs font-bold text-slate-800 tracking-tight">
                           {col.title}
