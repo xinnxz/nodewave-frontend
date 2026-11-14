@@ -578,9 +578,9 @@ export default function TaskDetailPage({
 
                 <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm space-y-4">
                   {prerequisitesList.length > 0 ? (
-                    <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 py-2">
+                    <div className="relative flex flex-col md:flex-row items-center justify-between gap-4 lg:gap-6 py-2">
                       {/* Left: Prerequisite Cards */}
-                      <div className="flex flex-col gap-4 w-full md:w-[280px] lg:w-[300px]">
+                      <div className="flex flex-col gap-3.5 w-full md:w-[310px] lg:w-[340px]">
                         {prerequisitesList.map((prereq) => (
                           <div
                             key={prereq.id}
@@ -612,8 +612,8 @@ export default function TaskDetailPage({
                                 )}
                                 <div className="min-w-0 flex-1">
                                   <p
-                                    className="text-xs font-bold text-slate-900 leading-snug break-words"
                                     title={prereq.title}
+                                    className="text-xs font-bold text-slate-900 leading-snug line-clamp-2"
                                   >
                                     {prereq.title}
                                   </p>
@@ -624,7 +624,7 @@ export default function TaskDetailPage({
                               </div>
                               <span
                                 className={cn(
-                                  'rounded px-1.5 py-0.5 text-[9px] font-bold shrink-0 border whitespace-nowrap',
+                                  'rounded px-2 py-0.5 text-[9px] font-bold shrink-0 border whitespace-nowrap',
                                   prereq.isDone
                                     ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                                     : 'bg-blue-50 border-blue-200 text-blue-700',
@@ -638,7 +638,7 @@ export default function TaskDetailPage({
                       </div>
 
                       {/* Middle: Official DAG Connector Asset */}
-                      <div className="hidden md:flex items-center justify-center w-16">
+                      <div className="hidden md:flex items-center justify-center shrink-0 w-12 lg:w-16">
                         <img
                           src="/assets/dependency/dag-connector.svg"
                           alt="DAG Connector"
@@ -647,7 +647,7 @@ export default function TaskDetailPage({
                       </div>
 
                       {/* Right: Target Task Card */}
-                      <div className="w-full md:w-[260px]">
+                      <div className="w-full md:w-[280px] lg:w-[300px]">
                         <div
                           className={cn(
                             'rounded-xl border p-4 shadow-2xs',
@@ -692,8 +692,8 @@ export default function TaskDetailPage({
                     </div>
                   ) : (
                     /* Root Deliverable in DAG (No Prerequisites) */
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-3">
-                      <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 w-full md:w-[260px]">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 lg:gap-6 py-3">
+                      <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 w-full md:w-[280px] lg:w-[300px]">
                         <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
                         <div>
                           <p className="text-xs font-bold text-emerald-950">Root Deliverable</p>
@@ -703,7 +703,7 @@ export default function TaskDetailPage({
                         </div>
                       </div>
 
-                      <div className="hidden md:flex items-center justify-center w-16">
+                      <div className="hidden md:flex items-center justify-center shrink-0 w-12 lg:w-16">
                         <svg width="48" height="24" viewBox="0 0 48 24" fill="none">
                           <path
                             d="M 0 12 L 44 12"
@@ -715,8 +715,13 @@ export default function TaskDetailPage({
                         </svg>
                       </div>
 
-                      <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 w-full md:w-[260px]">
-                        <p className="text-xs font-bold text-slate-900 truncate">{task?.title}</p>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 w-full md:w-[280px] lg:w-[300px]">
+                        <p
+                          title={task?.title}
+                          className="text-xs font-bold text-slate-900 leading-snug line-clamp-2"
+                        >
+                          {task?.title}
+                        </p>
                         <p className="text-[10px] text-slate-500 font-mono mt-0.5">
                           NW-{task ? task.id.slice(-4).toUpperCase() : '1008'} • {task?.department}
                         </p>
